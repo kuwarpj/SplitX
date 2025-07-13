@@ -10,7 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { lightThemeColors as colors } from '../theme/theme'; // Replace with your actual path
+import { lightThemeColors as colors } from '../constants/Colors';
 
 const SignupScreen = ({ navigation }: any) =>{
   const [showPassword, setShowPassword] = useState(false);

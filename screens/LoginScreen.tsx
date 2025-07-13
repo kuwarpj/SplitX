@@ -9,7 +9,7 @@ import {
     TouchableOpacity,
     View
 } from "react-native";
-import { lightThemeColors as colors } from '../theme/theme';
+import { lightThemeColors as colors } from '../constants/Colors';
 const LoginScreen = ({ navigation }: any) => {
 
   const [email, setEmail] = useState("");
