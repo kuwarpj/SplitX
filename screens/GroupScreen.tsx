@@ -1,5 +1,6 @@
 import Button from "@/components/ui/Button";
 import { Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import {
   ScrollView,
@@ -12,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { lightThemeColors as colors } from "../constants/Colors";
 
 const GroupsScreen = () => {
+  const navigation = useNavigation();
   const [groups] = useState([
     {
       id: "1",
@@ -108,22 +110,18 @@ const GroupsScreen = () => {
       style={{ flex: 1, backgroundColor: colors.background }}
       edges={["top", "left", "right"]}
     >
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <TouchableOpacity style={styles.iconBtn}>
-              <Feather name="arrow-left" size={20} color={colors.foreground} />
-            </TouchableOpacity>
-            <View>
-              <Text style={styles.headerTitle}>Groups</Text>
-              <Text style={styles.subText}>{groups.length} active groups</Text>
-            </View>
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <View>
+            <Text style={styles.headerTitle}>Groups</Text>
+            <Text style={styles.subText}>{groups.length} active groups</Text>
           </View>
-          <Button label="New Group" icon="plus" onPress={() => {}} />
         </View>
+        <Button label="New Group" icon="plus" onPress={() => {}} />
+      </View>
 
-        {/* Summary Cards */}
+      {/* Summary Cards */}
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
         <View style={styles.summaryRow}>
           <View style={styles.card}>
             <View style={styles.cardHeader}>
@@ -148,158 +146,176 @@ const GroupsScreen = () => {
         {/* Group List */}
         <Text style={styles.sectionTitle}>All Groups</Text>
         {groups.map((group) => (
-          <View key={group.id} style={styles.groupCard}>
-            <View style={styles.groupHeader}>
-              <View style={styles.groupLeft}>
-                <View style={styles.groupIcon}>
-                  <Text>{group.icon}</Text>
+          <TouchableOpacity
+            key={group.id}
+            onPress={() =>
+              navigation.navigate("GroupDetails", { groupId: group.id })
+            }
+            activeOpacity={0.8}
+          >
+            <View key={group.id} style={styles.groupCard}>
+              <View style={styles.groupHeader}>
+                <View style={styles.groupLeft}>
+                  <View style={styles.groupIcon}>
+                    <Text>{group.icon}</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.groupName}>{group.name}</Text>
+                    <Text style={styles.subText}>{group.description}</Text>
+                  </View>
                 </View>
-                <View>
-                  <Text style={styles.groupName}>{group.name}</Text>
-                  <Text style={styles.subText}>{group.description}</Text>
+                <View style={{ alignItems: "flex-end" }}>
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      color:
+                        group.totalBalance > 0
+                          ? "green"
+                          : group.totalBalance < 0
+                          ? "red"
+                          : colors.mutedForeground,
+                    }}
+                  >
+                    {group.totalBalance === 0
+                      ? "Settled"
+                      : `${group.totalBalance > 0 ? "+" : "-"}$${Math.abs(
+                          group.totalBalance
+                        ).toFixed(2)}`}
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    <Feather
+                      name={
+                        group.totalBalance === 0
+                          ? "check-circle"
+                          : group.pendingSettlements > 0
+                          ? "clock"
+                          : "dollar-sign"
+                      }
+                      size={14}
+                      color={
+                        group.totalBalance === 0
+                          ? "green"
+                          : group.pendingSettlements > 0
+                          ? "orange"
+                          : colors.primary
+                      }
+                    />
+                    <Text
+                      style={{ fontSize: 12, color: colors.mutedForeground }}
+                    >
+                      {group.totalBalance > 0
+                        ? "owed"
+                        : group.totalBalance < 0
+                        ? "you owe"
+                        : "settled"}
+                    </Text>
+                  </View>
                 </View>
               </View>
-              <View style={{ alignItems: "flex-end" }}>
-                <Text
-                  style={{
-                    fontWeight: "bold",
-                    color:
-                      group.totalBalance > 0
-                        ? "green"
-                        : group.totalBalance < 0
-                        ? "red"
-                        : colors.mutedForeground,
-                  }}
-                >
-                  {group.totalBalance === 0
-                    ? "Settled"
-                    : `${group.totalBalance > 0 ? "+" : "-"}$${Math.abs(
-                        group.totalBalance
-                      ).toFixed(2)}`}
+
+              {/* Members */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 8,
+                  gap: 6,
+                }}
+              >
+                <Feather
+                  name="users"
+                  size={14}
+                  color={colors.mutedForeground}
+                />
+                <View style={{ flexDirection: "row" }}>
+                  {group.members.slice(0, 4).map((member) => (
+                    <View
+                      key={member.id}
+                      style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: 12,
+                        backgroundColor: colors.accent,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginLeft: -6,
+                        borderWidth: 1,
+                        borderColor: colors.card,
+                      }}
+                    >
+                      <Text style={{ fontSize: 10, color: colors.primary }}>
+                        {member.avatar.charAt(0)}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+                <Text style={{ fontSize: 12, color: colors.mutedForeground }}>
+                  {group.members.length} members
                 </Text>
+              </View>
+
+              {/* Recent Activity */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginTop: 8,
+                }}
+              >
                 <View
                   style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
                 >
                   <Feather
-                    name={
-                      group.totalBalance === 0
-                        ? "check-circle"
-                        : group.pendingSettlements > 0
-                        ? "clock"
-                        : "dollar-sign"
-                    }
-                    size={14}
-                    color={
-                      group.totalBalance === 0
-                        ? "green"
-                        : group.pendingSettlements > 0
-                        ? "orange"
-                        : colors.primary
-                    }
+                    name="calendar"
+                    size={12}
+                    color={colors.mutedForeground}
                   />
                   <Text style={{ fontSize: 12, color: colors.mutedForeground }}>
-                    {group.totalBalance > 0
-                      ? "owed"
-                      : group.totalBalance < 0
-                      ? "you owe"
-                      : "settled"}
+                    {group.recentActivity}
                   </Text>
                 </View>
-              </View>
-            </View>
-
-            {/* Members */}
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginTop: 8,
-                gap: 6,
-              }}
-            >
-              <Feather name="users" size={14} color={colors.mutedForeground} />
-              <View style={{ flexDirection: "row" }}>
-                {group.members.slice(0, 4).map((member) => (
-                  <View
-                    key={member.id}
-                    style={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: 12,
-                      backgroundColor: colors.accent,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginLeft: -6,
-                      borderWidth: 1,
-                      borderColor: colors.card,
-                    }}
-                  >
-                    <Text style={{ fontSize: 10, color: colors.primary }}>
-                      {member.avatar.charAt(0)}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-              <Text style={{ fontSize: 12, color: colors.mutedForeground }}>
-                {group.members.length} members
-              </Text>
-            </View>
-
-            {/* Recent Activity */}
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginTop: 8,
-              }}
-            >
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
-              >
-                <Feather
-                  name="calendar"
-                  size={12}
-                  color={colors.mutedForeground}
-                />
                 <Text style={{ fontSize: 12, color: colors.mutedForeground }}>
-                  {group.recentActivity}
+                  {group.lastUpdated}
                 </Text>
               </View>
-              <Text style={{ fontSize: 12, color: colors.mutedForeground }}>
-                {group.lastUpdated}
-              </Text>
-            </View>
 
-            {/* Settlements */}
-            {group.pendingSettlements > 0 && (
-              <View style={styles.settleBox}>
-                <Feather name="clock" size={14} color="orange" />
-                <Text style={{ fontSize: 13, color: "orange" }}>
-                  {group.pendingSettlements} pending settlement
-                  {group.pendingSettlements > 1 ? "s" : ""}
-                </Text>
-                <Button
-                  variant="outline"
-                  label="Settle"
-                  onPress={() => {}}
-                  style={{
-                    height: 30,
-                    paddingHorizontal: 10,
-                    marginLeft: "auto",
-                  }}
-                  textStyle={{ fontSize: 12, color: "orange" }}
-                />
-              </View>
-            )}
-            {group.pendingSettlements === 0 && group.totalBalance === 0 && (
-              <View style={styles.settleBoxGreen}>
-                <Feather name="check-circle" size={14} color="green" />
-                <Text style={{ fontSize: 13, color: "green" }}>
-                  All settled up! 🎉
-                </Text>
-              </View>
-            )}
-          </View>
+              {/* Settlements */}
+              {group.pendingSettlements > 0 && (
+                <View style={styles.settleBox}>
+                  <Feather name="clock" size={14} color="orange" />
+                  <Text style={{ fontSize: 13, color: "orange" }}>
+                    {group.pendingSettlements} pending settlement
+                    {group.pendingSettlements > 1 ? "s" : ""}
+                  </Text>
+                  <Button
+                    variant="outline"
+                    label="Settle"
+                    onPress={() => {}}
+                    style={{
+                      height: 30,
+                      paddingHorizontal: 10,
+                      marginLeft: "auto",
+                    }}
+                    textStyle={{ fontSize: 12, color: "orange" }}
+                  />
+                </View>
+              )}
+              {group.pendingSettlements === 0 && group.totalBalance === 0 && (
+                <View style={styles.settleBoxGreen}>
+                  <Feather name="check-circle" size={14} color="green" />
+                  <Text style={{ fontSize: 13, color: "green" }}>
+                    All settled up! 🎉
+                  </Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
         ))}
 
         {/* CTA */}
@@ -318,15 +334,19 @@ const GroupsScreen = () => {
   );
 };
 
-
-export default GroupsScreen
+export default GroupsScreen;
 
 const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    // marginBottom: 16,
+
+    padding: 16,
+    paddingTop: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   headerLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
   iconBtn: {
@@ -342,8 +362,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     borderRadius: 14,
     padding: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 1,
   },
   cardHeader: {
     flexDirection: "row",
@@ -363,8 +385,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     padding: 16,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
+
     marginBottom: 14,
   },
   groupHeader: {

@@ -45,37 +45,39 @@ export default function HomeScreen({ navigation }: any) {
   const netBalance = totalOwed - totalOwe;
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
-      <ScrollView style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <View style={styles.iconBox}>
-              <Feather name="dollar-sign" size={24} color="#fff" />
-            </View>
-            <View>
-              <Text style={styles.title}>ShareBills</Text>
-              <Text style={styles.subtitle}>Welcome back, John</Text>
-            </View>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      edges={["top", "left", "right"]}
+    >
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <View style={styles.iconBox}>
+            <Feather name="dollar-sign" size={24} color="#fff" />
           </View>
-          <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.iconButton}>
-              <Ionicons
-                name="notifications-outline"
-                size={20}
-                color={colors.foreground}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
-              <Ionicons
-                name="settings-outline"
-                size={20}
-                color={colors.foreground}
-              />
-            </TouchableOpacity>
+          <View>
+            <Text style={styles.title}>ShareBills</Text>
+            <Text style={styles.subtitle}>Welcome back, John</Text>
           </View>
         </View>
-
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.iconButton}>
+            <Ionicons
+              name="notifications-outline"
+              size={20}
+              color={colors.foreground}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton}>
+            <Ionicons
+              name="settings-outline"
+              size={20}
+              color={colors.foreground}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+      <ScrollView style={styles.container}>
         {/* Net Balance Card */}
         <View style={styles.card}>
           <Text style={styles.centerText}>Your net balance</Text>
@@ -111,7 +113,7 @@ export default function HomeScreen({ navigation }: any) {
             variant="solid"
             onPress={() => {}}
           />
-         
+
           <Button
             label="Settle Up"
             icon={<FontAwesome5 name="handshake" size={16} color="#007AFF" />}
@@ -197,9 +199,16 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   header: {
+    backgroundColor: colors.background,
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 16,
+    alignItems: "center",
+    // marginBottom: 16,
+
+    padding: 16,
+    paddingTop: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   headerLeft: {
     flexDirection: "row",

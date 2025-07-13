@@ -1,6 +1,6 @@
 // ActivityScreen.tsx (React Native Version with Pixel-Perfect Matching)
-import { Feather } from '@expo/vector-icons';
-import { useState } from 'react';
+import { Feather } from "@expo/vector-icons";
+import { useState } from "react";
 import {
   LayoutAnimation,
   Platform,
@@ -10,9 +10,9 @@ import {
   TouchableOpacity,
   UIManager,
   View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { lightThemeColors as colors } from '../constants/Colors';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { lightThemeColors as colors } from "../constants/Colors";
 interface ActivityItem {
   id: string;
   type: "expense" | "payment" | "settlement";
@@ -39,22 +39,19 @@ interface ActivityItem {
   status: "pending" | "settled" | "partial";
 }
 
-if (Platform.OS === 'android') UIManager.setLayoutAnimationEnabledExperimental?.(true);
-
+if (Platform.OS === "android")
+  UIManager.setLayoutAnimationEnabledExperimental?.(true);
 
 const ActivityScreen = () => {
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState("all");
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
-
- 
 
   const toggleExpand = (id: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpandedCardId((prev) => (prev === id ? null : id));
   };
 
-
-   const [activities] = useState<ActivityItem[]>([
+  const [activities] = useState<ActivityItem[]>([
     {
       id: "1",
       type: "expense",
@@ -172,16 +169,15 @@ const ActivityScreen = () => {
     },
   ]);
 
-   const filtered = activities.filter((a) => {
-    if (activeFilter === 'you_owe') return a.yourShare > 0;
-    if (activeFilter === 'you_are_owed') return a.yourShare < 0;
+  const filtered = activities.filter((a) => {
+    if (activeFilter === "you_owe") return a.yourShare > 0;
+    if (activeFilter === "you_are_owed") return a.yourShare < 0;
     return true;
   });
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-         
           <View style={{ marginLeft: 10 }}>
             <Text style={styles.headerTitle}>Activity</Text>
             <Text style={styles.subText}>{filtered.length} transactions</Text>
@@ -193,14 +189,26 @@ const ActivityScreen = () => {
       </View>
 
       <View style={styles.tabsContainer}>
-        {['all', 'you_owe', 'you_are_owed'].map((type) => (
+        {["all", "you_owe", "you_are_owed"].map((type) => (
           <TouchableOpacity
             key={type}
             onPress={() => setActiveFilter(type)}
-            style={[styles.tabButton, activeFilter === type && styles.tabActive]}
+            style={[
+              styles.tabButton,
+              activeFilter === type && styles.tabActive,
+            ]}
           >
-            <Text style={[styles.tabText, activeFilter === type && styles.tabTextActive]}>
-              {type === 'all' ? 'All' : type === 'you_owe' ? 'You Owe' : 'You are Owed'}
+            <Text
+              style={[
+                styles.tabText,
+                activeFilter === type && styles.tabTextActive,
+              ]}
+            >
+              {type === "all"
+                ? "All"
+                : type === "you_owe"
+                ? "You Owe"
+                : "You are Owed"}
             </Text>
           </TouchableOpacity>
         ))}
@@ -222,23 +230,25 @@ const ActivityScreen = () => {
                   style={{
                     color:
                       item.yourShare > 0
-                        ? 'red'
+                        ? "red"
                         : item.yourShare < 0
-                        ? 'green'
-                        : 'gray',
+                        ? "green"
+                        : "gray",
                   }}
                 >
                   {item.yourShare > 0
                     ? `You owe $${item.yourShare}`
                     : item.yourShare < 0
                     ? `You get $${Math.abs(item.yourShare)}`
-                    : 'Settled'}
+                    : "Settled"}
                 </Text>
               </View>
               <Text style={styles.subText}>{item.description}</Text>
               {isExpanded && (
                 <View style={{ marginTop: 12 }}>
-                  <Text style={styles.subText}>Paid by: {item.paidBy.name}</Text>
+                  <Text style={styles.subText}>
+                    Paid by: {item.paidBy.name}
+                  </Text>
                   <Text style={styles.subText}>
                     Group: {item.group.icon} {item.group.name}
                   </Text>
@@ -259,10 +269,12 @@ const ActivityScreen = () => {
           );
         })}
         {filtered.length === 0 && (
-          <View style={{ alignItems: 'center', marginTop: 40 }}>
+          <View style={{ alignItems: "center", marginTop: 40 }}>
             <Feather name="file" size={48} color="gray" />
             <Text style={styles.headerTitle}>No activities found</Text>
-            <Text style={styles.subText}>Nothing to show in this category.</Text>
+            <Text style={styles.subText}>
+              Nothing to show in this category.
+            </Text>
           </View>
         )}
       </ScrollView>
@@ -272,48 +284,50 @@ const ActivityScreen = () => {
 
 const styles = StyleSheet.create({
   header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+
     padding: 16,
+    paddingTop: 0,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
   headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: colors.foreground,
   },
   subText: {
     fontSize: 13,
-    color: 'gray',
+    color: "gray",
   },
   tabsContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 10,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     backgroundColor: colors.secondary,
   },
   tabButton: {
     flex: 1,
     padding: 10,
-    alignItems: 'center',
+    alignItems: "center",
     borderRadius: 6,
   },
   tabActive: {
     backgroundColor: colors.card,
   },
   tabText: {
-    color: 'gray',
+    color: "gray",
     fontSize: 13,
   },
   tabTextActive: {
     color: colors.primary,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   card: {
     backgroundColor: colors.card,
@@ -324,13 +338,13 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   rowBetween: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.foreground,
   },
 });

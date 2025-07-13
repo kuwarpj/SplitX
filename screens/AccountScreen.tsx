@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { lightThemeColors as colors } from '../constants/Colors';
+import { lightThemeColors as colors } from "../constants/Colors";
 
 export default function AccountScreen() {
   const [darkMode, setDarkMode] = useState(false);
@@ -72,7 +72,10 @@ export default function AccountScreen() {
   ];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background  }} edges={["top", "left", "right"]}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      edges={["top", "left", "right"]}
+    >
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View>
@@ -167,7 +170,8 @@ export default function AccountScreen() {
                   <Text style={styles.rowDesc}>{item.description}</Text>
                 </View>
               </View>
-              <Feather name="chevron-right" size={20} color="#9CA3AF" />
+
+              <Feather name="chevron-right" size={20} color={colors.primary} />
             </TouchableOpacity>
           ))}
         </View>
@@ -194,16 +198,17 @@ export default function AccountScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f0f6ff",
-
+    backgroundColor: "#F8F8F8",
+    paddingTop: 16,
   },
   header: {
-   padding: 16,
+    padding: 16,
+    paddingTop: 0,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   headerLeft: { flexDirection: "row", alignItems: "center", gap: 8 },
   headerTitle: { fontSize: 18, fontWeight: "bold", color: "#111827" },
@@ -221,7 +226,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginHorizontal: 16,
     padding: 16,
-    marginBottom: 16,
+    
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 8,

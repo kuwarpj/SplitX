@@ -1,6 +1,6 @@
 import AccountScreen from "@/screens/AccountScreen";
 import ActivityScreen from "@/screens/ActivityScreen";
-import GroupScreen from "@/screens/GroupScreen";
+import GroupsScreen from "@/screens/GroupScreen";
 import HomeScreen from "@/screens/HomeScreen";
 import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -32,12 +32,12 @@ export default function BottomTabNavigator() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: "#007AFF",
+        tabBarActiveTintColor: "hsl(218, 100%, 22%)",
         tabBarInactiveTintColor: "gray",
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Group" component={GroupScreen} />
+      <Tab.Screen name="Group" component={GroupsScreen} />
       <Tab.Screen name="Activity" component={ActivityScreen} />
       <Tab.Screen name="Account" component={AccountScreen} />
     </Tab.Navigator>

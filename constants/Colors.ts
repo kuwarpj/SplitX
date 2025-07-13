@@ -1,7 +1,7 @@
 // theme.ts
 
 export const lightThemeColors = {
-  background: "#f0f6ff",
+  background: "#F8F8F8",
   foreground: "hsl(222.2, 84%, 4.9%)",
 
   card: "hsl(0, 0%, 100%)",
