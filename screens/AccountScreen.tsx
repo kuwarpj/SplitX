@@ -1,5 +1,9 @@
+import Routes from "@/constants/ApiRoutes";
+import { useApp } from "@/context/AppContext";
+import { fetchAPI } from "@/utils/fetchAPI";
+import { storage } from "@/utils/storage";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -15,6 +19,7 @@ export default function AccountScreen() {
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
+  const { setIsLoggedIn } = useApp();
 
   const userProfile = {
     name: "John Doe",
@@ -70,6 +75,18 @@ export default function AccountScreen() {
       icon: <Feather name="file-text" size={20} color="#4B5563" />,
     },
   ];
+
+  const handleLogout = useCallback(async () => {
+    try {
+      const data = await fetchAPI(Routes.LOGOUT, "POST");
+      console.log("This is Signou", data)
+      if (data?.success === true) {
+        setIsLoggedIn(false)
+        await storage.remove("token");
+        await storage.remove("user");
+      }
+    } catch (error) {}
+  }, []);
 
   return (
     <SafeAreaView
@@ -178,7 +195,7 @@ export default function AccountScreen() {
 
         {/* Sign Out */}
         <View style={styles.card}>
-          <TouchableOpacity style={styles.signOutBtn}>
+          <TouchableOpacity onPress={handleLogout}  style={styles.signOutBtn}>
             <Feather name="log-out" size={16} color="#DC2626" />
             <Text style={styles.signOutText}>Sign Out</Text>
           </TouchableOpacity>
@@ -226,7 +243,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginHorizontal: 16,
     padding: 16,
-    
+
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 8,

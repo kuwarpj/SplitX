@@ -1,28 +1,13 @@
+import { ButtonProps } from "@/type";
 import { Feather } from "@expo/vector-icons";
-import React from "react";
 import {
     ActivityIndicator,
     StyleSheet,
     Text,
-    TextStyle,
     TouchableOpacity,
-    View,
-    ViewStyle,
+    View
 } from "react-native";
-
-interface ButtonProps {
-  label: string;
-  onPress?: () => void;
-  loading?: boolean;
-  disabled?: boolean;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
-  variant?: "solid" | "outline";
-  icon?: string | React.ReactNode; // Accept string OR component
-  iconPosition?: "left" | "right"; // default: left
-  iconSize?: number;
-  iconColor?: string;
-}
+import { lightThemeColors as colors } from "../../constants/Colors";
 
 const Button = ({
   label,
@@ -38,7 +23,7 @@ const Button = ({
   iconColor,
 }: ButtonProps) => {
   const isOutline = variant === "outline";
-  const computedIconColor = iconColor || (isOutline ? "#007AFF" : "#fff");
+  const computedIconColor = iconColor || (isOutline ? colors.primary : "#fff");
 
   const renderIcon = () => {
     if (!icon) return null;

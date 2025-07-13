@@ -1,4 +1,5 @@
 import Button from "@/components/ui/Button";
+import { useApp } from "@/context/AppContext";
 import { Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
@@ -14,7 +15,7 @@ import { lightThemeColors as colors } from "../constants/Colors";
 export default function HomeScreen({ navigation }: any) {
   const [totalOwed] = useState(245.5);
   const [totalOwe] = useState(89.25);
-
+  const { user } = useApp();
   const [friendBalances] = useState([
     {
       id: "1",
@@ -56,8 +57,8 @@ export default function HomeScreen({ navigation }: any) {
             <Feather name="dollar-sign" size={24} color="#fff" />
           </View>
           <View>
-            <Text style={styles.title}>ShareBills</Text>
-            <Text style={styles.subtitle}>Welcome back, John</Text>
+            <Text style={styles.title}>SplitX</Text>
+            <Text style={styles.subtitle}>Welcome back, {user?.username}</Text>
           </View>
         </View>
         <View style={styles.headerRight}>

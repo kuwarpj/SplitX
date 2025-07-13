@@ -1,24 +1,62 @@
+import Routes from "@/constants/ApiRoutes";
+import { useApp } from "@/context/AppContext";
+import { fetchAPI } from "@/utils/fetchAPI";
+import { storage } from "@/utils/storage";
 import { Feather, Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
-    Alert,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { lightThemeColors as colors } from '../constants/Colors';
-const LoginScreen = ({ navigation }: any) => {
+import Toast from "react-native-toast-message";
+import { lightThemeColors as colors } from "../constants/Colors";
 
+const LoginScreen = ({ navigation }: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { setIsLoggedIn } = useApp();
+  const handleLogin = useCallback(async () => {
+    setIsLoading(true);
+    const body = { email, password };
 
-  const handleLogin = () => {
-    Alert.alert("Sign In", `Email: ${email}\nPassword: ${password}`);
-  };
+    try {
+      const data = await fetchAPI(Routes.LOGIN, "POST", body);
+     
+      if (data?.success === true) {
+        setIsLoggedIn(true)
+        const user = data.data;
+ console.log("This is Data", user);
+        // Store user and token
+        storage.set("user", JSON.stringify(user));
+        storage.set("token", user.token); // or data.token if sent separately
+
+        Toast.show({
+          type: "success",
+          text1: "Login Successful",
+          text2: "Welcome back!",
+        });
+
+        // navigation.navigate("Home")
+
+        // navigation.navigate("Home");
+      }
+    } catch (err: any) {
+      Toast.show({
+        type: "error",
+        text1: "Login failed",
+        text2: "Invalid credentials",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [email, password, navigation]);
+
   return (
     <View style={styles.container}>
       <View style={styles.logoBox}>
@@ -33,11 +71,18 @@ const LoginScreen = ({ navigation }: any) => {
 
       <View style={styles.card}>
         <Text style={styles.welcome}>Welcome back</Text>
-        <Text style={styles.description}>Sign in to your account to continue</Text>
+        <Text style={styles.description}>
+          Sign in to your account to continue
+        </Text>
 
         {/* Email Field */}
         <View style={styles.inputGroup}>
-          <Feather name="mail" size={20} color="#888" style={styles.inputIcon} />
+          <Feather
+            name="mail"
+            size={20}
+            color="#888"
+            style={styles.inputIcon}
+          />
           <TextInput
             placeholder="Email address"
             keyboardType="email-address"
@@ -45,12 +90,18 @@ const LoginScreen = ({ navigation }: any) => {
             placeholderTextColor="#999"
             value={email}
             onChangeText={setEmail}
+            autoCapitalize="none"
           />
         </View>
 
         {/* Password Field */}
         <View style={styles.inputGroup}>
-          <Feather name="lock" size={20} color="#888" style={styles.inputIcon} />
+          <Feather
+            name="lock"
+            size={20}
+            color="#888"
+            style={styles.inputIcon}
+          />
           <TextInput
             placeholder="Enter your password"
             secureTextEntry={!showPassword}
@@ -59,8 +110,15 @@ const LoginScreen = ({ navigation }: any) => {
             value={password}
             onChangeText={setPassword}
           />
-          <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-            <Feather name={showPassword ? "eye-off" : "eye"} size={20} color="#888" />
+          <Pressable
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.eyeIcon}
+          >
+            <Feather
+              name={showPassword ? "eye-off" : "eye"}
+              size={20}
+              color="#888"
+            />
           </Pressable>
         </View>
 
@@ -70,8 +128,14 @@ const LoginScreen = ({ navigation }: any) => {
         </TouchableOpacity>
 
         {/* Sign In Button */}
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginText}>Sign in</Text>
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          <Text style={styles.loginText}>
+            {isLoading ? "Signing in..." : "Sign in"}
+          </Text>
         </TouchableOpacity>
 
         {/* Divider */}
@@ -91,7 +155,10 @@ const LoginScreen = ({ navigation }: any) => {
       {/* Footer */}
       <Text style={styles.bottomText}>
         Don’t have an account?{" "}
-        <Text style={styles.linkText} onPress={() => navigation.navigate("SignUp")}>
+        <Text
+          style={styles.linkText}
+          onPress={() => navigation.navigate("signup")}
+        >
           Sign up
         </Text>
       </Text>
@@ -105,10 +172,9 @@ const LoginScreen = ({ navigation }: any) => {
       </View>
     </View>
   );
-}
+};
 
-export default LoginScreen
-
+export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
