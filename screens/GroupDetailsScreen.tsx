@@ -1,6 +1,11 @@
+import Routes from "@/constants/ApiRoutes";
+import { fetchAPI } from "@/utils/fetchAPI";
+import { formatTimeAgo } from "@/utils/utils";
 import { Feather } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { useCallback, useEffect, useState } from "react";
 import {
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,6 +17,45 @@ import { lightThemeColors as colors } from "../constants/Colors";
 
 const GroupDetailsScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  const { groupId } = route.params;
+
+  const [expense, setExpense] = useState([]);
+  const [userGroupSummary, setUserGroupSummary] = useState([]);
+
+  const getGroupDetails = useCallback(async () => {
+    try {
+      const data = await fetchAPI(
+        `${Routes.GET_GROUP_EXPENSE}${groupId}`,
+        "GET"
+      );
+
+      if (data?.success === true) {
+        setExpense(data?.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  const getUserGroupFinincialSummary = useCallback(async () => {
+    try {
+      const data = await fetchAPI(
+        Routes.GET_USER_GROUP_SUMMARY(groupId),
+        "GET"
+      );
+      console.log("This is Central response------->", data);
+
+      if (data?.success === true) {
+        setUserGroupSummary(data?.data);
+      }
+    } catch (error) {}
+  }, []);
+
+  useEffect(() => {
+    getGroupDetails();
+    getUserGroupFinincialSummary();
+  }, []);
 
   const groupData = {
     id: "1",
@@ -80,25 +124,8 @@ const GroupDetailsScreen = () => {
   const getStatusColor = (value: number) =>
     value === 0 ? "#6b7280" : value > 0 ? "#16a34a" : "#dc2626";
 
-  const getCategoryIcon = (category: string) => {
-    const icons: Record<string, string> = {
-      food: "🍽️",
-      travel: "🏕️",
-      transport: "🚗",
-      home: "🏠",
-      entertainment: "🎬",
-    };
-    return icons[category] || "💰";
-  };
-
-  const getTransactionStatus = (status: string, amount: number) => {
-    if (status === "not_involved") return "Not involved";
-    if (status === "settled") return "Settled";
-    return `${status === "lent" ? "Lent" : "Owe"} ₹${Math.abs(amount)}`;
-  };
-
   return (
-    <SafeAreaView style={{ flex: 1,  backgroundColor: colors.background, }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -107,8 +134,10 @@ const GroupDetailsScreen = () => {
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Text style={styles.emoji}>{groupData.icon}</Text>
           <View>
-            <Text style={styles.groupTitle}>{groupData.name}</Text>
-            <Text style={styles.groupDesc}>{groupData.description}</Text>
+            <Text style={styles.groupTitle}>{userGroupSummary?.name}</Text>
+            <Text style={styles.groupDesc}>
+              {userGroupSummary?.description}
+            </Text>
           </View>
         </View>
         <Feather name="settings" size={20} color="gray" />
@@ -121,94 +150,164 @@ const GroupDetailsScreen = () => {
             <Text style={styles.sectionTitle}>Members</Text>
             <View style={styles.row}>
               <Feather name="users" size={16} color="gray" />
-              <Text style={styles.grayText}>{groupData.members.length}</Text>
+              <Text style={styles.grayText}>
+                {userGroupSummary?.totalMembers}
+              </Text>
             </View>
           </View>
           <View style={{ flexDirection: "row", marginTop: 10 }}>
-            {groupData.members.map((m) => (
+            {userGroupSummary?.members?.map((m: any) => (
               <View key={m.id} style={styles.avatar}>
-                <Text style={{ color: "#1d4ed8", fontWeight: "bold" }}>
-                  {m.avatar[0]}
-                </Text>
+                <Image
+                  source={{ uri: m?.avatarUrl }}
+                  style={{ width: 30, height: 30, borderRadius: 8 }}
+                />
               </View>
             ))}
           </View>
         </View>
-
-        {/* Net Balance */}
-        <View style={styles.netCard}>
-          <View style={styles.center}>
-            <View style={styles.balanceIcon}>
-              <Feather name="dollar-sign" size={24} color="#1d4ed8" />
-            </View>
-            <Text style={styles.grayText}>Your net balance</Text>
-            <Text
-              style={{
-                fontSize: 24,
-                fontWeight: "bold",
-                color: getStatusColor(yourNetBalance),
-              }}
-            >
-              {yourNetBalance === 0
-                ? "All settled 🎉"
-                : `₹${Math.abs(yourNetBalance)}`}
-            </Text>
-            <Text
-              style={{
-                color: getStatusColor(yourNetBalance),
-                marginTop: 4,
-              }}
-            >
-              {yourNetBalance > 0 ? "You are owed" : "You owe"}
-            </Text>
-          </View>
-        </View>
-
         {/* Balances */}
-        {membersYouOwe.concat(membersWhoOweYou).map((m) => (
-          <View key={m.id} style={styles.card}>
-            <View style={styles.rowBetween}>
-              <View style={styles.row}>
+        <View style={{ marginTop: 20 }}>
+          {/* Title */}
+          <Text style={{ fontWeight: "600", fontSize: 16, color: "#111827" }}>
+            Balance Overview
+          </Text>
+
+          {/* Balance Card */}
+          <View
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 12,
+              padding: 16,
+              marginTop: 12,
+              shadowColor: "#000",
+              shadowOpacity: 0.05,
+              shadowOffset: { width: 0, height: 2 },
+              shadowRadius: 4,
+              elevation: 3,
+              marginBottom:16
+            }}
+          >
+            {/* Net Balance */}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                
+              }}
+            >
+              <View>
+                <Text style={{ fontSize: 13, color: "#6B7280" }}>
+                  Your net balance
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 20,
+                    fontWeight: "bold",
+                    color:
+                      yourNetBalance > 0
+                        ? "#16a34a"
+                        : yourNetBalance < 0
+                        ? "#dc2626"
+                        : "#374151",
+                  }}
+                >
+                  {yourNetBalance === 0
+                    ? "All settled! 🎉"
+                    : `₹${Math.abs(yourNetBalance).toFixed(0)}`}
+                </Text>
+              </View>
+
+              {yourNetBalance !== 0 && (
                 <View
-                  style={[
-                    styles.circle,
-                    {
-                      backgroundColor: m.balance > 0 ? "#dcfce7" : "#fee2e2",
-                    },
-                  ]}
+                  style={{
+                    backgroundColor: yourNetBalance > 0 ? "#bbf7d0" : "#fecaca",
+                    paddingVertical: 4,
+                    paddingHorizontal: 12,
+                    borderRadius: 16,
+                  }}
                 >
                   <Text
                     style={{
-                      color: m.balance > 0 ? "#15803d" : "#dc2626",
-                      fontWeight: "bold",
+                      fontSize: 12,
+                      fontWeight: "600",
+                      color: yourNetBalance > 0 ? "#15803d" : "#b91c1c",
                     }}
                   >
-                    {m.avatar[0]}
+                    {yourNetBalance > 0 ? "You are owed" : "You owe"}
                   </Text>
                 </View>
-                <View>
-                  <Text style={{ fontWeight: "bold" }}>{m.name}</Text>
-                  <Text
+              )}
+            </View>
+
+            {/* Divider */}
+            {(membersYouOwe.length > 0 || membersWhoOweYou.length > 0) && (
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: "#E5E7EB",
+                  marginVertical: 12,
+                }}
+              />
+            )}
+
+            {userGroupSummary?.balances?.map((member: any) => (
+              <View
+                key={member._id}
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 8,
+                }}
+              >
+                {/* Left Side - Avatar and Name */}
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <View
                     style={{
-                      fontSize: 12,
-                      color: m.balance > 0 ? "#16a34a" : "#dc2626",
+                      width: 24,
+                      height: 24,
+                      borderRadius: 12,
+                      backgroundColor: "#bbf7d0",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      marginRight: 8,
                     }}
                   >
-                    {m.balance > 0 ? "owes you" : "you owe"}
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontWeight: "bold",
+                        color: "#15803d",
+                      }}
+                    >
+                      {member.username.charAt(0)}
+                    </Text>
+                  </View>
+                  <Text style={{ fontSize: 14, color: "#374151" }}>
+                    {member?.status === "owe"
+                      ? `You owe ${member?.username}`
+                      : `${member?.username} owe You`}
+                  </Text>
+                </View>
+
+                {/* Right Side - Net Balance and Status */}
+                <View style={{ alignItems: "flex-end" }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "bold",
+                      color: member.status === "lent" ? "#16a34a" : "#dc2626",
+                    }}
+                  >
+                    ₹{Math.abs(member.netBalance).toFixed(0)}
                   </Text>
                 </View>
               </View>
-              <Text
-                style={{
-                  fontWeight: "bold",
-                  color: m.balance > 0 ? "#16a34a" : "#dc2626",
-                }}
-              >
-                ₹{Math.abs(m.balance).toFixed(0)}
-              </Text>
-            </View>
+            ))}
           </View>
-        ))}
+        </View>
 
         {/* Actions */}
         <View style={styles.rowBetween}>
@@ -225,47 +324,72 @@ const GroupDetailsScreen = () => {
         {/* Transactions */}
         <View style={{ marginTop: 20 }}>
           <Text style={styles.sectionTitle}>Transactions</Text>
-          {groupData.transactions.map((t) => (
-            <View key={t.id} style={styles.transactionCard}>
+          {expense?.map((t: any) => (
+            <View key={t._id} style={styles.transactionCard}>
               <View style={styles.rowBetween}>
                 <View style={styles.row}>
                   <Text style={{ fontSize: 20 }}>
-                    {getCategoryIcon(t.category)}
+                    {/* {getCategoryIcon(t.category)} */}
+                    🍽️
                   </Text>
                   <View style={{ marginLeft: 8 }}>
-                    <Text style={{ fontWeight: "bold" }}>{t.title}</Text>
-                    <Text style={styles.grayText}>{t.date}</Text>
+                    <Text style={{ fontWeight: "bold" }}>{t.description}</Text>
+                    <Text style={styles.grayText}>
+                      {formatTimeAgo(t.createdAt)}
+                    </Text>
                   </View>
                 </View>
                 <View style={{ alignItems: "flex-end" }}>
-                  <Text
-                    style={{
-                      color:
-                        t.userInvolvement.status === "lent"
-                          ? "#16a34a"
-                          : t.userInvolvement.status === "owe"
-                          ? "#dc2626"
-                          : "#6b7280",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {getTransactionStatus(
-                      t.userInvolvement.status,
-                      t.userInvolvement.amount
-                    )}
-                  </Text>
+                  <View style={{ alignItems: "flex-end" }}>
+                    <Text
+                      style={{
+                        color:
+                          t.status === "lent"
+                            ? "#16a34a"
+                            : t.status === "owe"
+                            ? "#dc2626"
+                            : "#6b7280",
+                        fontWeight: "bold",
+                        fontSize: 12,
+                      }}
+                    >
+                      ₹{t.amountInView}
+                    </Text>
+
+                    <Text
+                      style={{
+                        color:
+                          t.status === "lent"
+                            ? "#16a34a"
+                            : t.status === "owe"
+                            ? "#dc2626"
+                            : "#6b7280",
+                        fontSize: 12,
+                      }}
+                    >
+                      {t.status === "lent"
+                        ? "lent"
+                        : t.status === "owe"
+                        ? "owe"
+                        : ""}
+                    </Text>
+                  </View>
                 </View>
               </View>
-              <View style={{backgroundColor:'#F9FAFB', borderRadius: 12, padding:12, marginVertical:12}}>
-                <Text style={{fontSize:12, color: '#374151'}}>
-                  <Text style={{fontWeight:500}}>Kuwar Jha </Text>{" "}
-                  paid{" "}
-                  <Text style={{fontWeight:600}}>
-                    ₹500}
-                  </Text>{" "}
-                  and split between{" "}
-                  <Text style={{fontWeight:500}}>
-                    4 members
+              <View
+                style={{
+                  backgroundColor: "#F9FAFB",
+                  borderRadius: 12,
+                  padding: 12,
+                  marginVertical: 12,
+                }}
+              >
+                <Text style={{ fontSize: 12, color: "#374151" }}>
+                  <Text style={{ fontWeight: 500 }}>{t?.paidBy?.username}</Text>{" "}
+                  paid <Text style={{ fontWeight: 600 }}>₹{t?.amount}</Text> and
+                  split between{" "}
+                  <Text style={{ fontWeight: 500 }}>
+                    {t?.participants?.length} members
                   </Text>
                 </Text>
               </View>
@@ -284,7 +408,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-  
 
     padding: 16,
     paddingTop: 0,
