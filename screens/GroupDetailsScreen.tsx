@@ -313,7 +313,9 @@ const GroupDetailsScreen = () => {
         <View style={styles.rowBetween}>
           <TouchableOpacity style={styles.primaryBtn}>
             <Feather name="plus" size={16} color="#fff" />
-            <Text style={styles.btnText}>Add Expense</Text>
+            <Text onPress={()=>{
+              navigation.navigate("AddExpense",{ groupId: groupId })
+            }} style={styles.btnText}>Add Expense</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.outlineBtn}>
             <Feather name="dollar-sign" size={16} color="#1d4ed8" />

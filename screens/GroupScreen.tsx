@@ -1,10 +1,8 @@
 import Button from "@/components/ui/Button";
-import Routes from "@/constants/ApiRoutes";
-import { fetchAPI } from "@/utils/fetchAPI";
+import { useApp } from "@/context/AppContext";
 import { formatTimeAgo } from "@/utils/utils";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { useCallback, useEffect, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -18,111 +16,9 @@ import { lightThemeColors as colors } from "../constants/Colors";
 
 const GroupsScreen = () => {
   const navigation = useNavigation();
-  const [group, setGroup] = useState([]);
+  const {userGroup} = useApp()
 
-  const [groups] = useState([
-    {
-      id: "1",
-      name: "Apartment Rent",
-      type: "home",
-      icon: "🏠",
-      totalBalance: 450.0,
-      members: [
-        { id: "1", name: "Alex", avatar: "AJ" },
-        { id: "2", name: "Sarah", avatar: "SC" },
-        { id: "3", name: "Mike", avatar: "MR" },
-      ],
-      recentActivity: "Rent for December added",
-      pendingSettlements: 2,
-      lastUpdated: "2 hours ago",
-      description: "Monthly rent and utilities",
-    },
-    {
-      id: "2",
-      name: "Weekend Trip",
-      type: "travel",
-      icon: "✈️",
-      totalBalance: -89.25,
-      members: [
-        { id: "4", name: "Emma", avatar: "EW" },
-        { id: "5", name: "John", avatar: "JD" },
-        { id: "6", name: "Lisa", avatar: "LB" },
-        { id: "7", name: "Tom", avatar: "TC" },
-      ],
-      recentActivity: "Hotel payment split",
-      pendingSettlements: 1,
-      lastUpdated: "1 day ago",
-      description: "Lake Tahoe weekend getaway",
-    },
-    {
-      id: "3",
-      name: "Dinner Club",
-      type: "food",
-      icon: "🍽️",
-      totalBalance: 34.5,
-      members: [
-        { id: "8", name: "Ryan", avatar: "RP" },
-        { id: "9", name: "Kate", avatar: "KM" },
-        { id: "10", name: "Dave", avatar: "DL" },
-      ],
-      recentActivity: "Italian restaurant bill",
-      pendingSettlements: 0,
-      lastUpdated: "3 days ago",
-      description: "Weekly dinner outings",
-    },
-    {
-      id: "4",
-      name: "Office Lunch",
-      type: "food",
-      icon: "🍽️",
-      totalBalance: 0,
-      members: [
-        { id: "11", name: "Amy", avatar: "AS" },
-        { id: "12", name: "Bob", avatar: "BJ" },
-        { id: "13", name: "Carol", avatar: "CD" },
-        { id: "14", name: "Dan", avatar: "DF" },
-      ],
-      recentActivity: "All settled up!",
-      pendingSettlements: 0,
-      lastUpdated: "1 week ago",
-      description: "Daily lunch orders",
-    },
-    {
-      id: "5",
-      name: "Gym Membership",
-      type: "general",
-      icon: "💪",
-      totalBalance: -25.0,
-      members: [
-        { id: "15", name: "Steve", avatar: "SL" },
-        { id: "16", name: "Nina", avatar: "NR" },
-      ],
-      recentActivity: "Monthly fee split",
-      pendingSettlements: 1,
-      lastUpdated: "5 days ago",
-      description: "Shared fitness membership",
-    },
-  ]);
-
-  const totalOwed = groups
-    .filter((group) => group.totalBalance > 0)
-    .reduce((sum, group) => sum + group.totalBalance, 0);
-  const totalOwe = groups
-    .filter((group) => group.totalBalance < 0)
-    .reduce((sum, group) => sum + Math.abs(group.totalBalance), 0);
-
-  const getUserGroup = useCallback(async () => {
-    try {
-      const data = await fetchAPI(Routes.GET_USER_GROUP, "GET");
-      if (data?.success === true) {
-        setGroup(data?.data);
-      }
-    } catch (error) {}
-  }, []);
-
-  useEffect(() => {
-    getUserGroup();
-  }, []);
+ 
 
   return (
     <SafeAreaView
@@ -133,7 +29,7 @@ const GroupsScreen = () => {
         <View style={styles.headerLeft}>
           <View>
             <Text style={styles.headerTitle}>Groups</Text>
-            <Text style={styles.subText}>{group.length} active groups</Text>
+            <Text style={styles.subText}>{userGroup?.length} active groups</Text>
           </View>
         </View>
         <Button label="New Group" icon="plus" onPress={() => {}} />
@@ -148,7 +44,7 @@ const GroupsScreen = () => {
               <Text style={styles.cardLabel}>Groups owe you</Text>
             </View>
             <Text style={[styles.amount, { color: "green" }]}>
-              ${totalOwed.toFixed(2)}
+              {/* ${totalOwed.toFixed(2)} */}775
             </Text>
           </View>
           <View style={styles.card}>
@@ -157,14 +53,14 @@ const GroupsScreen = () => {
               <Text style={styles.cardLabel}>You owe groups</Text>
             </View>
             <Text style={[styles.amount, { color: "red" }]}>
-              ${totalOwe.toFixed(2)}
+              {/* ${totalOwe.toFixed(2)} */} 6686
             </Text>
           </View>
         </View>
 
         {/* Group List */}
         <Text style={styles.sectionTitle}>All Groups</Text>
-        {group.map((group: any, index) => (
+        {userGroup?.map((group: any, index) => (
           <TouchableOpacity
             key={index}
             onPress={() =>
