@@ -9,7 +9,7 @@ export async function fetchAPI<T = any>(
   body: Record<string, any> | null = null
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-
+  console.log("This is centeral url", url);
   // Get the token from AsyncStorage
   const token = await storage.get("token");
 
@@ -27,7 +27,6 @@ export async function fetchAPI<T = any>(
 
   try {
     const response = await fetch(url, options);
-
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || response.statusText);
@@ -37,7 +36,9 @@ export async function fetchAPI<T = any>(
       return null as T;
     }
 
-    return await response.json();
+    const responseData = await response.json(); 
+
+    return responseData;
   } catch (error) {
     console.error("Error fetching data:", error);
     throw error;
