@@ -22,7 +22,7 @@ export const validateForm = (
   const errors: FormErrors = {};
 
   Object.entries(schema).forEach(([field, rules]) => {
-    const value = formData[field]?.trim() || '';
+    const value = formData[field]?.trim() || "";
 
     if (rules.required && !value) {
       errors[field] = rules.customMessage || `${field} is required`;
@@ -44,8 +44,7 @@ export const validateForm = (
     }
 
     if (rules.regex && value && !rules.regex.test(value)) {
-      errors[field] =
-        rules.customMessage || `${field} is invalid format`;
+      errors[field] = rules.customMessage || `${field} is invalid format`;
       return;
     }
 
@@ -59,10 +58,18 @@ export const validateForm = (
   return errors;
 };
 
+export const formatTimeAgo = (dateString: string | null | undefined): string => {
+  if (!dateString || typeof dateString !== 'string') {
+    return "Invalid date";
+  }
 
+  const parsedTime = Date.parse(dateString);
 
-export const formatTimeAgo = (dateString: string): string => {
-  const date = new Date(dateString);
+  if (isNaN(parsedTime)) {
+    return "Invalid date";
+  }
+
+  const date = new Date(parsedTime);
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
@@ -92,4 +99,4 @@ export const formatTimeAgo = (dateString: string): string => {
       });
     }
   }
-}
+};

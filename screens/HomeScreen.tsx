@@ -13,9 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { lightThemeColors as colors } from "../constants/Colors";
 
 export default function HomeScreen({ navigation }: any) {
-  const [totalOwed] = useState(245.5);
-  const [totalOwe] = useState(89.25);
-  const { user } = useApp();
+  const { user, userGroup } = useApp();
   const [friendBalances] = useState([
     {
       id: "1",
@@ -43,8 +41,18 @@ export default function HomeScreen({ navigation }: any) {
     },
   ]);
 
-  const netBalance = totalOwed - totalOwe;
+  const totalSummary = userGroup?.reduce(
+    (acc, group) => {
+      acc.totalOwe += group.summary?.youOwe || 0;
+      acc.totalLent += group.summary?.youLent || 0;
+      return acc;
+    },
+    { totalOwe: 0, totalLent: 0 }
+  );
 
+  const totalOwe = totalSummary?.totalOwe;
+  const totalLent = totalSummary?.totalLent;
+  const netBalance = totalLent - totalOwe;
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: colors.background }}
@@ -62,7 +70,12 @@ export default function HomeScreen({ navigation }: any) {
           </View>
         </View>
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("Notification");
+            }}
+            style={styles.iconButton}
+          >
             <Ionicons
               name="notifications-outline"
               size={20}
@@ -88,7 +101,7 @@ export default function HomeScreen({ navigation }: any) {
               { color: netBalance >= 0 ? "green" : "red" },
             ]}
           >
-            ${Math.abs(netBalance).toFixed(2)}
+            ₹{Math.abs(netBalance)?.toFixed(2)}
           </Text>
           <Text style={styles.centerSubText}>
             {netBalance >= 0 ? "You are owed overall" : "You owe overall"}
@@ -97,11 +110,11 @@ export default function HomeScreen({ navigation }: any) {
           <View style={styles.balanceRow}>
             <View style={styles.balanceBox}>
               <Text style={styles.label}>You're owed</Text>
-              <Text style={styles.amountGreen}>${totalOwed.toFixed(2)}</Text>
+              <Text style={styles.amountGreen}>₹{totalLent?.toFixed(2)}</Text>
             </View>
             <View style={styles.balanceBox}>
               <Text style={styles.label}>You owe</Text>
-              <Text style={styles.amountRed}>${totalOwe.toFixed(2)}</Text>
+              <Text style={styles.amountRed}>₹{totalOwe?.toFixed(2)}</Text>
             </View>
           </View>
         </View>
@@ -112,7 +125,9 @@ export default function HomeScreen({ navigation }: any) {
             label="Add Expense"
             icon="plus"
             variant="solid"
-            onPress={() => {}}
+            onPress={() => {
+              navigation.navigate("AddExpense");
+            }}
           />
 
           <Button

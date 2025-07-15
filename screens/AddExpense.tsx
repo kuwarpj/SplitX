@@ -30,7 +30,7 @@ interface GroupMember {
 type SplitType = "equal" | "exact" | "percentage";
 
 const AddExpense = ({ route, navigation }) => {
-  const { groupId } = route.params;
+  const groupId = route?.params?.groupId ?? null;
   const { userGroup, user } = useApp();
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
@@ -794,7 +794,7 @@ const AddExpense = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    
+      flex: 1,
     backgroundColor: lightThemeColors.background,
   },
   header: {

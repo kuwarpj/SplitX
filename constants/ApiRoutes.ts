@@ -19,7 +19,8 @@ const Routes = {
   UPDATE_EXPENSE : '/api/expenses/edit',
   DASHBOARD_SUMMARY: '/api/users/userDetails',
   GET_NOTIFICATIONS: '/api/invite/getallinvite',
-  ACCEPT_INVITATION: '/api/invite/accept'
+  ACCEPT_INVITATION: (id: string) => `/api/invite/accept/${id}`,
+
 };
 
 export default Routes;

@@ -1,3 +1,4 @@
+import Loader from "@/components/Loader";
 import Routes from "@/constants/ApiRoutes";
 import { useApp } from "@/context/AppContext";
 import { fetchAPI } from "@/utils/fetchAPI";
@@ -19,8 +20,8 @@ export default function AccountScreen() {
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
-  const { setIsLoggedIn } = useApp();
-
+  const { setIsLoggedIn, user } = useApp();
+  const [loading, setLoading] = useState(false);
   const userProfile = {
     name: "John Doe",
     username: "john.doe",
@@ -77,15 +78,19 @@ export default function AccountScreen() {
   ];
 
   const handleLogout = useCallback(async () => {
+    setLoading(true);
     try {
       const data = await fetchAPI(Routes.LOGOUT, "POST");
-      console.log("This is Signou", data)
       if (data?.success === true) {
-        setIsLoggedIn(false)
+        setIsLoggedIn(false);
         await storage.remove("token");
         await storage.remove("user");
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   return (
@@ -93,6 +98,7 @@ export default function AccountScreen() {
       style={{ flex: 1, backgroundColor: colors.background }}
       edges={["top", "left", "right"]}
     >
+      {loading && <Loader />}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View>
@@ -115,9 +121,8 @@ export default function AccountScreen() {
             </View>
 
             <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>{userProfile.name}</Text>
-              <Text style={styles.profileHandle}>@{userProfile.username}</Text>
-              <Text style={styles.profileEmail}>{userProfile.email}</Text>
+              <Text style={styles.profileName}>{user?.username}</Text>
+              <Text style={styles.profileHandle}>{user?.email}</Text>
             </View>
 
             <Feather name="edit-2" size={20} color="#6B7280" />
@@ -195,7 +200,11 @@ export default function AccountScreen() {
 
         {/* Sign Out */}
         <View style={styles.card}>
-          <TouchableOpacity onPress={handleLogout}  style={styles.signOutBtn}>
+          <TouchableOpacity
+            activeOpacity={0.6}
+            onPress={handleLogout}
+            style={styles.signOutBtn}
+          >
             <Feather name="log-out" size={16} color="#DC2626" />
             <Text style={styles.signOutText}>Sign Out</Text>
           </TouchableOpacity>
@@ -243,7 +252,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginHorizontal: 16,
     padding: 16,
-
+    marginTop: 10,
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 8,

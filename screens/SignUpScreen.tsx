@@ -1,6 +1,8 @@
 import AnimatedError from "@/components/AnimatedError";
 import Routes from "@/constants/ApiRoutes";
+import { useApp } from "@/context/AppContext";
 import { fetchAPI } from "@/utils/fetchAPI";
+import { storage } from "@/utils/storage";
 import { validateForm } from "@/utils/utils";
 import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useCallback, useState } from "react";
@@ -36,6 +38,8 @@ export default function SignupScreen({ navigation }: any) {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: "" }));
   };
+
+  const {setIsLoggedIn} = useApp()
 
   const handleSendOtp = useCallback(async () => {
     setLoading(true);
@@ -112,10 +116,13 @@ export default function SignupScreen({ navigation }: any) {
 
       const data = await fetchAPI(Routes?.VERIFY_OPT, "POST", payload);
       if (data?.success === true) {
+            setIsLoggedIn(true);
         Toast.show({
           type: "success",
           text1: data?.message,
         });
+        storage.set("user", JSON.stringify(data?.data?.user));
+        storage.set("token", data?.data?.token);
       }
     } catch (error) {
       const errorMessage = error?.message || "Something went wrong";
@@ -131,7 +138,7 @@ export default function SignupScreen({ navigation }: any) {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, height:'100%', backgroundColor: colors.background }}
+      style={{ flex: 1, height: "100%", backgroundColor: colors.background }}
       edges={["top", "left", "right"]}
     >
       <ScrollView contentContainerStyle={styles.container}>
@@ -161,7 +168,7 @@ export default function SignupScreen({ navigation }: any) {
           </Text>
 
           {/* Email */}
-          {step === 1 && (
+          {/* {step === 1 && ( */}
             <View>
               <View style={{ marginBottom: 12 }}></View>
               <View style={styles.inputGroup}>
@@ -169,11 +176,13 @@ export default function SignupScreen({ navigation }: any) {
                 <TextInput
                   placeholder="Enter your email"
                   value={formData.email}
+                   
                   onChangeText={(text) => handleInputChange("email", text)}
                   style={[
                     styles.input,
                     errors.email ? styles.inputError : null,
                   ]}
+                  editable={step !== 2}
                   keyboardType="email-address"
                   placeholderTextColor="#999"
                 />
@@ -187,7 +196,7 @@ export default function SignupScreen({ navigation }: any) {
               </View>
               {errors.email && <AnimatedError message={errors.email} />}
             </View>
-          )}
+          {/* )} */}
 
           {step === 2 && (
             <>

@@ -66,6 +66,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     getUserGroup();
   }, [isLoggedIn]);
 
+
+  console.log("This is User group", JSON.stringify(userGroup))
+
   return (
     <AppContext.Provider value={{ isLoggedIn, setIsLoggedIn, user, setUser , userGroup}}>
       {children}

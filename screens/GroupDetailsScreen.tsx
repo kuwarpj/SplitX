@@ -1,11 +1,15 @@
+import Button from "@/components/ui/Button";
 import Routes from "@/constants/ApiRoutes";
 import { fetchAPI } from "@/utils/fetchAPI";
 import { formatTimeAgo } from "@/utils/utils";
 import { Feather } from "@expo/vector-icons";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { useCallback, useEffect, useState } from "react";
 import {
-  Image,
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
+import { useCallback, useState } from "react";
+import {
   ScrollView,
   StyleSheet,
   Text,
@@ -44,7 +48,7 @@ const GroupDetailsScreen = () => {
         Routes.GET_USER_GROUP_SUMMARY(groupId),
         "GET"
       );
-      console.log("This is Central response------->", data);
+      console.log("This is Central response------->", JSON.stringify(data));
 
       if (data?.success === true) {
         setUserGroupSummary(data?.data);
@@ -52,10 +56,12 @@ const GroupDetailsScreen = () => {
     } catch (error) {}
   }, []);
 
-  useEffect(() => {
-    getGroupDetails();
-    getUserGroupFinincialSummary();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      getGroupDetails();
+      getUserGroupFinincialSummary();
+    }, [groupId])
+  );
 
   const groupData = {
     id: "1",
@@ -121,9 +127,6 @@ const GroupDetailsScreen = () => {
     (m) => m.balance > 0 && m.id !== "1"
   );
 
-  const getStatusColor = (value: number) =>
-    value === 0 ? "#6b7280" : value > 0 ? "#16a34a" : "#dc2626";
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
@@ -132,11 +135,11 @@ const GroupDetailsScreen = () => {
           <Feather name="arrow-left" size={24} color="gray" />
         </TouchableOpacity>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Text style={styles.emoji}>{groupData.icon}</Text>
-          <View>
+          {/* <Text style={styles.emoji}>{groupData.icon}</Text> */}
+          <View style={{ alignItems: "center" }}>
             <Text style={styles.groupTitle}>{userGroupSummary?.name}</Text>
             <Text style={styles.groupDesc}>
-              {userGroupSummary?.description}
+              {userGroupSummary?.totalMembers} members
             </Text>
           </View>
         </View>
@@ -144,8 +147,8 @@ const GroupDetailsScreen = () => {
       </View>
 
       {/* Members */}
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <View style={styles.card}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingTop: 0 }}>
+        {/* <View style={styles.card}>
           <View style={styles.rowBetween}>
             <Text style={styles.sectionTitle}>Members</Text>
             <View style={styles.row}>
@@ -157,7 +160,7 @@ const GroupDetailsScreen = () => {
           </View>
           <View style={{ flexDirection: "row", marginTop: 10 }}>
             {userGroupSummary?.members?.map((m: any) => (
-              <View key={m.id} style={styles.avatar}>
+              <View key={m._id} style={styles.avatar}>
                 <Image
                   source={{ uri: m?.avatarUrl }}
                   style={{ width: 30, height: 30, borderRadius: 8 }}
@@ -165,13 +168,13 @@ const GroupDetailsScreen = () => {
               </View>
             ))}
           </View>
-        </View>
+        </View> */}
+
         {/* Balances */}
-        <View style={{ marginTop: 20 }}>
-          {/* Title */}
-          <Text style={{ fontWeight: "600", fontSize: 16, color: "#111827" }}>
+        <View style={{ marginTop: 1 }}>
+          {/* <Text style={{ fontWeight: "600", fontSize: 16, color: "#111827" }}>
             Balance Overview
-          </Text>
+          </Text> */}
 
           {/* Balance Card */}
           <View
@@ -185,7 +188,7 @@ const GroupDetailsScreen = () => {
               shadowOffset: { width: 0, height: 2 },
               shadowRadius: 4,
               elevation: 3,
-              marginBottom:16
+              marginBottom: 16,
             }}
           >
             {/* Net Balance */}
@@ -194,7 +197,6 @@ const GroupDetailsScreen = () => {
                 flexDirection: "row",
                 justifyContent: "space-between",
                 alignItems: "center",
-                
               }}
             >
               <View>
@@ -311,16 +313,19 @@ const GroupDetailsScreen = () => {
 
         {/* Actions */}
         <View style={styles.rowBetween}>
-          <TouchableOpacity style={styles.primaryBtn}>
-            <Feather name="plus" size={16} color="#fff" />
-            <Text onPress={()=>{
-              navigation.navigate("AddExpense",{ groupId: groupId })
-            }} style={styles.btnText}>Add Expense</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.outlineBtn}>
-            <Feather name="dollar-sign" size={16} color="#1d4ed8" />
-            <Text style={{ color: "#1d4ed8", marginLeft: 4 }}>Settle Up</Text>
-          </TouchableOpacity>
+          <Button
+            label="Add Expense"
+            onPress={() => {
+              navigation.navigate("AddExpense", { groupId: groupId });
+            }}
+            icon={<Feather name="plus" size={16} color="#fff" />}
+          />
+
+          <Button
+            label="Settle Up"
+            variant="outline"
+            icon={<Feather name="dollar-sign" size={16} color={colors.primary} />}
+          />
         </View>
 
         {/* Transactions */}
@@ -506,7 +511,7 @@ const styles = StyleSheet.create({
   outlineBtn: {
     flexDirection: "row",
     borderWidth: 1,
-    borderColor: "#1d4ed8",
+    borderColor: colors.primary,
     padding: 12,
     borderRadius: 8,
     alignItems: "center",

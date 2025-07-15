@@ -3,6 +3,7 @@ import AddExpenseScreen from "@/screens/AddExpense";
 import CreateGroup from "@/screens/CreateGroup";
 import GroupDetailsScreen from "@/screens/GroupDetailsScreen";
 import LoginScreen from "@/screens/LoginScreen";
+import NotificationsScreen from "@/screens/NotificationScreen";
 import SignupScreen from "@/screens/SignUpScreen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import BottomTabNavigator from "./BottomTabNavigator";
@@ -19,6 +20,8 @@ const RootNavigator = () => {
           <Stack.Screen name="GroupDetails" component={GroupDetailsScreen} />
           <Stack.Screen name="AddExpense" component={AddExpenseScreen} />
           <Stack.Screen name="CreateGroup" component={CreateGroup} />
+          <Stack.Screen name="Notification" component={NotificationsScreen} />
+
         </>
       ) : (
         <>

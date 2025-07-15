@@ -178,7 +178,7 @@ const ActivityScreen = () => {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <View style={{ marginLeft: 10 }}>
+          <View >
             <Text style={styles.headerTitle}>Activity</Text>
             <Text style={styles.subText}>{filtered.length} transactions</Text>
           </View>
@@ -284,14 +284,13 @@ const ActivityScreen = () => {
 
 const styles = StyleSheet.create({
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-
     padding: 16,
     paddingTop: 0,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   headerLeft: {
     flexDirection: "row",

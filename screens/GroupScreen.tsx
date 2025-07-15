@@ -24,48 +24,34 @@ const GroupsScreen = () => {
       edges={["top", "left", "right"]}
     >
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
+        <View
+          style={{
+            // alignItems: "center",
+            flex: 1,
+            width: "100%",
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
           <View>
-            <Text style={styles.headerTitle}>Groups</Text>
+            <Text style={styles.headerTitle}>
+              {userGroup?.length > 1 ? "Groups" : "Group"}
+            </Text>
             <Text style={styles.subText}>
-              {userGroup?.length} active groups
+              {userGroup?.length} active{" "}
+              {userGroup?.length > 1 ? "groups" : "group"}
             </Text>
           </View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+            <Feather name="plus" size={16} />
+            <Text>Add Group</Text>
+          </View>
         </View>
-        <Button
-          label="New Group"
-          icon="plus"
-          onPress={() => {
-            navigation.navigate("CreateGroup", {});
-          }}
-        />
       </View>
 
       {/* Summary Cards */}
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <View style={styles.summaryRow}>
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Feather name="trending-up" size={16} color="green" />
-              <Text style={styles.cardLabel}>Groups owe you</Text>
-            </View>
-            <Text style={[styles.amount, { color: "green" }]}>
-              {/* ${totalOwed.toFixed(2)} */}775
-            </Text>
-          </View>
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Feather name="trending-down" size={16} color="red" />
-              <Text style={styles.cardLabel}>You owe groups</Text>
-            </View>
-            <Text style={[styles.amount, { color: "red" }]}>
-              {/* ${totalOwe.toFixed(2)} */} 6686
-            </Text>
-          </View>
-        </View>
-
         {/* Group List */}
-        <Text style={styles.sectionTitle}>All Groups</Text>
         {userGroup?.map((group: any, index) => (
           <TouchableOpacity
             key={index}
@@ -91,28 +77,32 @@ const GroupsScreen = () => {
                 </View>
                 <View style={{ alignItems: "flex-end" }}>
                   {/* You Lent */}
-                  <Text
-                    style={{
-                      fontWeight: "bold",
-                      color: "green",
-                      marginTop: 2,
-                      fontSize: 10,
-                    }}
-                  >
-                    Lent: ${group.youLent.toFixed(2)}
-                  </Text>
+                  {group?.summary?.netLent > 0 && (
+                    <Text
+                      style={{
+                        fontWeight: "bold",
+                        color: "green",
+                        marginTop: 2,
+                        fontSize: 10,
+                      }}
+                    >
+                      Lent: ${group?.summary?.netLent?.toFixed(2)}
+                    </Text>
+                  )}
 
                   {/* You Owe */}
-                  <Text
-                    style={{
-                      fontWeight: "bold",
-                      color: "red",
-                      marginTop: 2,
-                      fontSize: 10,
-                    }}
-                  >
-                    Owe: ${group.youOwe.toFixed(2)}
-                  </Text>
+                  {group?.summary?.netOwe > 0 && (
+                    <Text
+                      style={{
+                        fontWeight: "bold",
+                        color: "red",
+                        marginTop: 2,
+                        fontSize: 10,
+                      }}
+                    >
+                      Owe: ${group?.summary?.netOwe?.toFixed(2)}
+                    </Text>
+                  )}
                 </View>
               </View>
 
@@ -178,7 +168,7 @@ const GroupsScreen = () => {
                   </Text>
                 </View>
                 <Text style={{ fontSize: 12, color: colors.mutedForeground }}>
-                  {formatTimeAgo(group.latestTransaction?.createdAt)}
+                  {formatTimeAgo(group?.latestTransaction?.createdAt)}
                 </Text>
               </View>
 
@@ -224,7 +214,13 @@ const GroupsScreen = () => {
           <Text style={styles.ctaSub}>
             Split expenses with roommates, friends, or travel companions
           </Text>
-          <Button label="Create Group" icon="plus" onPress={() => {}} />
+          <Button
+            label="Create Group"
+            icon="plus"
+            onPress={() => {
+              navigation.navigate("CreateGroup", {});
+            }}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -235,17 +231,15 @@ export default GroupsScreen;
 
 const styles = StyleSheet.create({
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    // marginBottom: 16,
-
     padding: 16,
     paddingTop: 0,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
-  headerLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
+
   iconBtn: {
     backgroundColor: colors.secondary,
     padding: 8,
