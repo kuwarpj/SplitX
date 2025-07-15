@@ -22,23 +22,27 @@ type AppContextType = {
   setIsLoggedIn: (val: boolean) => void;
   user: User | null;
   setUser: (user: User | null) => void;
-  userGroup: any[] | null;  
-  setUserGroup?: (items: any[] | null) => void;  
+  userGroup: any[] | null;
+  setUserGroup?: (items: any[] | null) => void;
+  loading: boolean;
 };
 
 const AppContext = createContext<AppContextType>({
   isLoggedIn: false,
   setIsLoggedIn: () => {},
+
   user: null,
   setUser: () => {},
   userGroup: null,
   setUserGroup: () => {},
+  loading: true,
 });
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [userGroup, setUserGroup] = useState<any[] | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const getUser = async () => {
     const token = await storage.get("token");
@@ -62,15 +66,22 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {}
   }, []);
   useEffect(() => {
-    getUser();
-    getUserGroup();
+    const initializeApp = async () => {
+      setLoading(true); // START LOADING
+      await getUser();
+      await getUserGroup();
+      setLoading(false); // FINISH LOADING
+    };
+
+    initializeApp();
   }, [isLoggedIn]);
 
-
-  console.log("This is User group", JSON.stringify(userGroup))
+  console.log("This is User group", JSON.stringify(userGroup));
 
   return (
-    <AppContext.Provider value={{ isLoggedIn, setIsLoggedIn, user, setUser , userGroup}}>
+    <AppContext.Provider
+      value={{ isLoggedIn, setIsLoggedIn, user, setUser, userGroup , loading,}}
+    >
       {children}
     </AppContext.Provider>
   );

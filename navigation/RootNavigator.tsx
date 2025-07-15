@@ -5,13 +5,18 @@ import GroupDetailsScreen from "@/screens/GroupDetailsScreen";
 import LoginScreen from "@/screens/LoginScreen";
 import NotificationsScreen from "@/screens/NotificationScreen";
 import SignupScreen from "@/screens/SignUpScreen";
+import SplashScreen from "@/screens/SplashScreen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import BottomTabNavigator from "./BottomTabNavigator";
 
 const Stack = createNativeStackNavigator();
 
 const RootNavigator = () => {
-  const { isLoggedIn } = useApp();
+  const { isLoggedIn, loading } = useApp();
+
+  if (loading) {
+    return <SplashScreen />; // Show splash during initialization
+  }
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {isLoggedIn ? (
@@ -21,7 +26,6 @@ const RootNavigator = () => {
           <Stack.Screen name="AddExpense" component={AddExpenseScreen} />
           <Stack.Screen name="CreateGroup" component={CreateGroup} />
           <Stack.Screen name="Notification" component={NotificationsScreen} />
-
         </>
       ) : (
         <>
