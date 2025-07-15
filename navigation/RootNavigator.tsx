@@ -1,4 +1,6 @@
 import { useApp } from "@/context/AppContext";
+import AddExpenseScreen from "@/screens/AddExpense";
+import CreateGroup from "@/screens/CreateGroup";
 import GroupDetailsScreen from "@/screens/GroupDetailsScreen";
 import LoginScreen from "@/screens/LoginScreen";
 import SignupScreen from "@/screens/SignUpScreen";
@@ -15,6 +17,8 @@ const RootNavigator = () => {
         <>
           <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
           <Stack.Screen name="GroupDetails" component={GroupDetailsScreen} />
+          <Stack.Screen name="AddExpense" component={AddExpenseScreen} />
+          <Stack.Screen name="CreateGroup" component={CreateGroup} />
         </>
       ) : (
         <>
