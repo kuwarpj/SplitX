@@ -1,7 +1,10 @@
+import AnimatedError from "@/components/AnimatedError";
+import Loader from "@/components/Loader";
 import Routes from "@/constants/ApiRoutes";
 import { useApp } from "@/context/AppContext";
 import { fetchAPI } from "@/utils/fetchAPI";
 import { storage } from "@/utils/storage";
+import { validateForm } from "@/utils/utils";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { useCallback, useState } from "react";
 import {
@@ -14,27 +17,48 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { lightThemeColors as colors } from "../constants/Colors";
-
 const LoginScreen = ({ navigation }: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { setIsLoggedIn } = useApp();
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   const handleLogin = useCallback(async () => {
+    const schema = {
+      email: {
+        required: true,
+        regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        customMessage: "Please enter a valid email address.",
+      },
+      password: {
+        required: true,
+        minLength: 6,
+        customMessage: "Password must be at least 6 characters.",
+      },
+    };
+    const foundErrors = validateForm({ email, password }, schema);
+
+    if (Object.keys(foundErrors).length > 0) {
+      setErrors(foundErrors);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     const body = { email, password };
 
     try {
       const data = await fetchAPI(Routes.LOGIN, "POST", body);
-     
+
       if (data?.success === true) {
-        setIsLoggedIn(true)
+        setIsLoggedIn(true);
         const user = data.data;
- console.log("This is Data", user);
+        console.log("This is Data", user);
         // Store user and token
         storage.set("user", JSON.stringify(user));
-        storage.set("token", user.token); // or data.token if sent separately
+        storage.set("token", user.token);
 
         Toast.show({
           type: "success",
@@ -59,15 +83,21 @@ const LoginScreen = ({ navigation }: any) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.logoBox}>
-        <View style={styles.logoCircle}>
-          <Ionicons name="phone-portrait-outline" size={28} color="white" />
+      {isLoading && <Loader />}
+      <View style={{display:'flex', justifyContent:'center', alignItems:'center'}}>
+        <View style={styles.logoBox}>
+          <View style={styles.logoCircle}>
+            <Ionicons name="phone-portrait-outline" size={28} color="white" />
+          </View>
+          <View style={styles.logoDot} />
         </View>
-        <View style={styles.logoDot} />
+        <View  style={{display:'flex', justifyContent:'center', alignItems:'center'}}>
+          <Text style={styles.title}>SplitX</Text>
+          <Text style={styles.subtitle}>
+            Split expenses with friends easily
+          </Text>
+        </View>
       </View>
-
-      <Text style={styles.title}>ShareBills</Text>
-      <Text style={styles.subtitle}>Split expenses with friends easily</Text>
 
       <View style={styles.card}>
         <Text style={styles.welcome}>Welcome back</Text>
@@ -76,50 +106,68 @@ const LoginScreen = ({ navigation }: any) => {
         </Text>
 
         {/* Email Field */}
-        <View style={styles.inputGroup}>
-          <Feather
-            name="mail"
-            size={20}
-            color="#888"
-            style={styles.inputIcon}
-          />
-          <TextInput
-            placeholder="Email address"
-            keyboardType="email-address"
-            style={styles.input}
-            placeholderTextColor="#999"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-          />
+        <View style={{ marginBottom: 12 }}>
+          <View style={styles.inputGroup}>
+            <Feather
+              name="mail"
+              size={20}
+              color="#888"
+              style={styles.inputIcon}
+            />
+            <TextInput
+              placeholder="Email address"
+              keyboardType="email-address"
+              style={styles.input}
+              placeholderTextColor="#999"
+              value={email}
+              onChangeText={(text) => {
+                setEmail(text);
+                if (errors.email) {
+                  setErrors((prev) => ({ ...prev, email: "" }));
+                }
+              }}
+              autoCapitalize="none"
+            />
+          </View>
+          {errors.email && <AnimatedError message={errors.email} />}
         </View>
 
         {/* Password Field */}
-        <View style={styles.inputGroup}>
-          <Feather
-            name="lock"
-            size={20}
-            color="#888"
-            style={styles.inputIcon}
-          />
-          <TextInput
-            placeholder="Enter your password"
-            secureTextEntry={!showPassword}
-            style={styles.input}
-            placeholderTextColor="#999"
-            value={password}
-            onChangeText={setPassword}
-          />
-          <Pressable
-            onPress={() => setShowPassword(!showPassword)}
-            style={styles.eyeIcon}
-          >
+
+        <View style={{ marginBottom: 12 }}>
+          <View style={styles.inputGroup}>
             <Feather
-              name={showPassword ? "eye-off" : "eye"}
+              name="lock"
               size={20}
               color="#888"
+              style={styles.inputIcon}
             />
-          </Pressable>
+            <TextInput
+              placeholder="Enter your password"
+              secureTextEntry={!showPassword}
+              style={styles.input}
+              placeholderTextColor="#999"
+              value={password}
+              onChangeText={(text) => {
+                setPassword(text);
+                if (errors.password) {
+                  setErrors((prev) => ({ ...prev, password: "" }));
+                }
+              }}
+            />
+            <Pressable
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.eyeIcon}
+            >
+              <Feather
+                name={showPassword ? "eye-off" : "eye"}
+                size={20}
+                color="#888"
+              />
+            </Pressable>
+          </View>
+
+          {errors.password && <AnimatedError message={errors.password} />}
         </View>
 
         {/* Forgot Password */}
@@ -132,9 +180,11 @@ const LoginScreen = ({ navigation }: any) => {
           style={styles.loginButton}
           onPress={handleLogin}
           disabled={isLoading}
+          activeOpacity={0.6}
         >
           <Text style={styles.loginText}>
-            {isLoading ? "Signing in..." : "Sign in"}
+            {/* {isLoading ? "Signing in..." : "Sign in"} */}
+            Sign in
           </Text>
         </TouchableOpacity>
 
@@ -211,6 +261,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     color: "#111",
+     marginBottom: 6,
   },
   subtitle: {
     fontSize: 14,
@@ -245,7 +296,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9fafb",
     borderRadius: 10,
     paddingHorizontal: 10,
-    marginBottom: 14,
+    // marginBottom: 14,
     borderWidth: 1,
     borderColor: "#e5e7eb",
   },
