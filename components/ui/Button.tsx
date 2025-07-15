@@ -1,11 +1,11 @@
 import { ButtonProps } from "@/type";
 import { Feather } from "@expo/vector-icons";
 import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import { lightThemeColors as colors } from "../../constants/Colors";
 
@@ -81,18 +81,19 @@ export default Button;
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 10,
+    padding: 12,
+    borderRadius: 8,
     alignItems: "center",
+    flex: 1,
+    marginLeft: 6,
     justifyContent: "center",
   },
   solid: {
-    backgroundColor: "#007AFF",
+    backgroundColor:colors.primary,
   },
   outline: {
     borderWidth: 1,
-    borderColor: "#007AFF",
+    borderColor: colors.primary,
     backgroundColor: "transparent",
   },
   solidText: {
@@ -100,7 +101,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   outlineText: {
-    color: "#007AFF",
+    color: colors?.primary,
     fontWeight: "600",
   },
   text: {
