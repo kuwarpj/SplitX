@@ -1,6 +1,8 @@
+import Routes from "@/constants/ApiRoutes";
 import { useApp } from "@/context/AppContext";
-import { Feather } from "@expo/vector-icons";
-import React, { useEffect, useMemo, useState } from "react";
+import { fetchAPI } from "@/utils/fetchAPI";
+import { AntDesign, Feather } from "@expo/vector-icons";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FlatList,
   Image,
@@ -13,7 +15,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { lightThemeColors } from "../constants/Colors"; // Import your light theme colors
+import Toast from "react-native-toast-message";
+import { lightThemeColors } from "../constants/Colors";
 
 interface GroupMember {
   id: string;
@@ -24,31 +27,27 @@ interface GroupMember {
   splitPercentage?: number;
 }
 
-interface ExpenseCategory {
-  id: string;
-  name: string;
-  icon: any;
-  color: string;
-}
-
 type SplitType = "equal" | "exact" | "percentage";
 
 const AddExpense = ({ route, navigation }) => {
   const { groupId } = route.params;
   const { userGroup, user } = useApp();
-  // Form state
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("general");
-  const [paidBy, setPaidBy] = useState(null);
+  const [paidBy, setPaidBy] = useState(String);
   const [splitType, setSplitType] = useState<SplitType>("equal");
   const [notes, setNotes] = useState("");
   const [showPaidByModal, setShowPaidByModal] = useState(false);
   const [showSplitModal, setShowSplitModal] = useState(false);
-
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
-
+  const [groupMembers, setGroupMembers] = useState<GroupMember[]>([]);
+  const [errors, setErrors] = useState({
+    description: "",
+    amount: "",
+    splitMembers: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   useEffect(() => {
     if (userGroup?.length) {
       if (groupId) {
@@ -68,6 +67,15 @@ const AddExpense = ({ route, navigation }) => {
       const foundMember = selectedGroup.members.find(
         (member: any) => member._id === user.id
       );
+      const initializedMembers = selectedGroup.members.map((member: any) => ({
+        id: member._id,
+        name: member.username,
+        avatar: member.username?.charAt(0),
+        isSelected: true, // default: everyone selected
+        splitAmount: 0,
+        splitPercentage: 0,
+      }));
+      setGroupMembers(initializedMembers);
       if (foundMember) {
         setPaidBy(user.id);
       } else {
@@ -75,13 +83,6 @@ const AddExpense = ({ route, navigation }) => {
       }
     }
   }, [selectedGroup, user]);
-  // Mock group data
-  const [groupMembers, setGroupMembers] = useState<GroupMember[]>([
-    { id: "1", name: "You", avatar: "YO", isSelected: true, splitAmount: 0 },
-    { id: "2", name: "Kuwar", avatar: "KS", isSelected: true, splitAmount: 0 },
-    { id: "3", name: "Sarah", avatar: "SC", isSelected: true, splitAmount: 0 },
-    { id: "4", name: "Mike", avatar: "MR", isSelected: false, splitAmount: 0 },
-  ]);
 
   const selectedMembers = groupMembers.filter((member) => member.isSelected);
   const totalAmount = parseFloat(amount) || 0;
@@ -133,19 +134,72 @@ const AddExpense = ({ route, navigation }) => {
     }
   }, [amount, selectedMembers.length, splitType]);
 
-  const handleSubmit = () => {
-    // Handle form submission
-    console.log("Expense submitted:", {
-      description,
+  const handleSubmit = useCallback(async () => {
+    let validationErrors = {
+      description: "",
+      amount: "",
+      splitMembers: "",
+    };
+
+    if (!description.trim()) {
+      validationErrors.description = "Description is required.";
+    }
+
+    if (!amount || parseFloat(amount) <= 0) {
+      validationErrors.amount = "Amount must be greater than 0.";
+    }
+
+    if (selectedMembers.length === 0) {
+      validationErrors.splitMembers =
+        "At least one participant must be selected.";
+    }
+
+    setErrors(validationErrors);
+
+    if (
+      validationErrors.description ||
+      validationErrors.amount ||
+      validationErrors.splitMembers
+    ) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    const participantIds = selectedMembers
+      .filter((m) => m.isSelected)
+      .map((m) => m.id);
+
+    const payload = {
+      groupId: selectedGroupId,
+      description: description,
       amount: totalAmount,
-      category: selectedCategory,
-      paidBy,
-      splitType,
-      members: selectedMembers,
-      notes,
-    });
-    navigation.goBack();
-  };
+      paidBy: paidBy,
+      participantIds,
+    };
+
+    try {
+      const data = await fetchAPI(Routes.ADD_EXPENSE, "POST", payload);
+      if (data?.success === true) {
+        Toast.show({
+          type: "success",
+          text1: "Expense added successfully!",
+        });
+        navigation.goBack();
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [
+    description,
+    amount,
+    selectedMembers,
+    paidBy,
+    selectedGroupId,
+    totalAmount,
+  ]);
+
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: lightThemeColors.background }}
@@ -159,11 +213,7 @@ const AddExpense = ({ route, navigation }) => {
               onPress={() => navigation.goBack()}
               style={styles.backButton}
             >
-              <Feather
-                name="arrow-left"
-                size={20}
-                color={lightThemeColors.foreground}
-              />
+              <Feather name="arrow-left" size={24} color="gray" />
             </TouchableOpacity>
             <View style={styles.headerTextContainer}>
               <Text style={styles.headerTitle}>Add Expense</Text>
@@ -178,9 +228,14 @@ const AddExpense = ({ route, navigation }) => {
                 (!description || !amount || selectedMembers.length === 0) &&
                   styles.saveButtonDisabled,
               ]}
-              disabled={!description || !amount || selectedMembers.length === 0}
             >
-              <Text style={styles.saveButtonText}>Save</Text>
+              <Text style={styles.saveButtonText}>
+                {isSubmitting ? (
+                  <Text style={styles.saveButtonText}>Saving</Text>
+                ) : (
+                  <Text style={styles.saveButtonText}>Save</Text>
+                )}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -304,11 +359,19 @@ const AddExpense = ({ route, navigation }) => {
               <TextInput
                 placeholder="What was this expense for?"
                 value={description}
-                onChangeText={setDescription}
+                onChangeText={(text) => {
+                  setDescription(text);
+                  if (errors.description)
+                    setErrors((prev) => ({ ...prev, description: "" }));
+                }}
                 style={styles.input}
                 placeholderTextColor={lightThemeColors.mutedForeground}
-                required
               />
+              {errors.description && (
+                <Text style={{ color: "red", marginTop: 4, fontSize: 12 }}>
+                  {errors.description}
+                </Text>
+              )}
             </View>
 
             {/* Amount */}
@@ -319,11 +382,15 @@ const AddExpense = ({ route, navigation }) => {
                   keyboardType="decimal-pad"
                   placeholder="0.00"
                   value={amount}
-                  onChangeText={setAmount}
+                  onChangeText={(text) => {
+                    setAmount(text);
+                    if (errors.amount)
+                      setErrors((prev) => ({ ...prev, amount: "" }));
+                  }}
                   style={[styles.input, styles.amountInput]}
                   placeholderTextColor={lightThemeColors.mutedForeground}
-                  required
                 />
+
                 <Feather
                   name="dollar-sign"
                   size={20}
@@ -331,45 +398,14 @@ const AddExpense = ({ route, navigation }) => {
                   style={styles.amountIcon}
                 />
               </View>
+              {errors.amount ? (
+                <Text style={{ color: "red", marginTop: 4, fontSize: 12 }}>
+                  {errors.amount}
+                </Text>
+              ) : null}
             </View>
           </View>
 
-          {/* Category Selection */}
-          {/* <View style={styles.card}>
-          <Text style={styles.cardTitle}>Category</Text>
-          <View style={styles.categoryGrid}>
-            {categories.map((category) => {
-              const Icon = category.icon;
-              return (
-                <TouchableOpacity
-                  key={category.id}
-                  onPress={() => setSelectedCategory(category.id)}
-                  style={[
-                    styles.categoryButton,
-                    selectedCategory === category.id &&
-                      styles.categoryButtonSelected,
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.categoryIcon,
-                      { backgroundColor: category.color },
-                    ]}
-                  >
-                    <Icon
-                      color={lightThemeColors.foreground}
-                      width={16}
-                      height={16}
-                    />
-                  </View>
-                  <Text style={styles.categoryText}>{category.name}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View> */}
-
-          {/* Compact Paid By and Split Display */}
           <View style={styles.card}>
             <View style={styles.splitHeader}>
               <Text style={styles.cardTitle}>Split Details</Text>
@@ -380,7 +416,8 @@ const AddExpense = ({ route, navigation }) => {
                   color={lightThemeColors.foreground}
                 />
                 <Text style={styles.splitPeopleText}>
-                  {selectedGroup?.members?.length} people
+                  {groupMembers.filter((member) => member.isSelected).length}{" "}
+                  people
                 </Text>
               </View>
             </View>
@@ -396,17 +433,19 @@ const AddExpense = ({ route, navigation }) => {
                   <Text style={styles.splitOptionLabel}>Paid by</Text>
                   {/* Display the name of user who is paying by default it wil be login user name */}
                   <Text style={styles.splitOptionValue}>
-                    {selectedGroup?.members?.find((m:any) => m._id === paidBy)
+                    {selectedGroup?.members?.find((m: any) => m._id === paidBy)
                       ?._id === user?.id
                       ? "You"
-                      : selectedGroup?.members?.find((m:any) => m._id === paidBy)
-                          ?.username || "Unknown"}
+                      : selectedGroup?.members?.find(
+                          (m: any) => m._id === paidBy
+                        )?.username || "Unknown"}
                   </Text>
                 </View>
                 <View style={styles.splitOptionRight}>
                   <View style={styles.avatarSmall}>
                     <Text style={styles.avatarTextSmall}>
-                      {selectedGroup.members?.find((m:any) => m._id === paidBy)
+                      {selectedGroup?.members
+                        ?.find((m: any) => m._id === paidBy)
                         ?.username.charAt(0)}
                     </Text>
                   </View>
@@ -433,10 +472,10 @@ const AddExpense = ({ route, navigation }) => {
                   </Text>
                 </View>
                 <View style={styles.splitOptionRight}>
-                  <Feather
-                    name="calculator"
+                  <AntDesign
+                    name="calendar"
                     size={20}
-                    color={lightThemeColors.foreground}
+                    color={lightThemeColors.primary}
                   />
                   <View style={styles.optionChevron}>
                     <View style={styles.chevronDot} />
@@ -640,9 +679,7 @@ const AddExpense = ({ route, navigation }) => {
 
                     {/* Avatar */}
                     <View style={styles.avatarSmall}>
-                      <Text style={styles.avatarTextSmall}>
-                        {item.avatar.charAt(0)}
-                      </Text>
+                      <Text style={styles.avatarTextSmall}>{item.avatar}</Text>
                     </View>
 
                     {/* Name */}
@@ -653,11 +690,11 @@ const AddExpense = ({ route, navigation }) => {
                       <View style={styles.memberSplitInputContainer}>
                         {splitType === "equal" ? (
                           <Text style={styles.memberSplitAmount}>
-                            ${(item.splitAmount || 0).toFixed(2)}
+                            ₹{(item.splitAmount || 0).toFixed(2)}
                           </Text>
                         ) : splitType === "exact" ? (
                           <View style={styles.exactAmountInput}>
-                            <Text style={styles.currencySymbol}>$</Text>
+                            <Text style={styles.currencySymbol}>₹</Text>
                             <TextInput
                               keyboardType="decimal-pad"
                               value={item.splitAmount?.toString() || ""}
@@ -707,13 +744,13 @@ const AddExpense = ({ route, navigation }) => {
                   <View style={styles.splitSummaryRow}>
                     <Text style={styles.splitSummaryLabel}>Total expense:</Text>
                     <Text style={styles.splitSummaryValue}>
-                      ${totalAmount.toFixed(2)}
+                      ₹{totalAmount.toFixed(2)}
                     </Text>
                   </View>
                   <View style={styles.splitSummaryRow}>
                     <Text style={styles.splitSummaryLabel}>Split amount:</Text>
                     <Text style={styles.splitSummaryValue}>
-                      ${getTotalSplitAmount().toFixed(2)}
+                      {getTotalSplitAmount().toFixed(2)}
                     </Text>
                   </View>
                   <View style={styles.splitSummaryRow}>
@@ -735,7 +772,7 @@ const AddExpense = ({ route, navigation }) => {
                           : styles.splitSummaryNegative,
                       ]}
                     >
-                      ${getRemainingAmount().toFixed(2)}
+                      ₹{getRemainingAmount().toFixed(2)}
                     </Text>
                   </View>
                 </View>
@@ -757,7 +794,7 @@ const AddExpense = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    
     backgroundColor: lightThemeColors.background,
   },
   header: {
@@ -784,29 +821,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTextContainer: {
-    marginLeft: 12,
+    alignItems: "center",
+    // marginLeft: 12,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "bold",
     color: lightThemeColors.foreground,
   },
   headerSubtitle: {
-    fontSize: 14,
+    fontSize: 12,
     color: lightThemeColors.mutedForeground,
   },
   saveButton: {
-    backgroundColor: lightThemeColors.primary,
+    // backgroundColor: lightThemeColors.primary,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 10,
   },
   saveButtonDisabled: {
-    opacity: 0.5,
+    opacity: 1,
   },
   saveButtonText: {
-    color: lightThemeColors.primaryForeground,
-    fontWeight: "500",
+    color: lightThemeColors.primary,
+    fontWeight: "700",
   },
   content: {
     flex: 1,
@@ -1208,7 +1246,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   groupSelectionLabel: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "500",
     color: lightThemeColors.foreground,
   },

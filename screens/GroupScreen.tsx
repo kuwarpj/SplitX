@@ -16,9 +16,7 @@ import { lightThemeColors as colors } from "../constants/Colors";
 
 const GroupsScreen = () => {
   const navigation = useNavigation();
-  const {userGroup} = useApp()
-
- 
+  const { userGroup } = useApp();
 
   return (
     <SafeAreaView
@@ -29,10 +27,18 @@ const GroupsScreen = () => {
         <View style={styles.headerLeft}>
           <View>
             <Text style={styles.headerTitle}>Groups</Text>
-            <Text style={styles.subText}>{userGroup?.length} active groups</Text>
+            <Text style={styles.subText}>
+              {userGroup?.length} active groups
+            </Text>
           </View>
         </View>
-        <Button label="New Group" icon="plus" onPress={() => {}} />
+        <Button
+          label="New Group"
+          icon="plus"
+          onPress={() => {
+            navigation.navigate("CreateGroup", {});
+          }}
+        />
       </View>
 
       {/* Summary Cards */}
@@ -90,7 +96,7 @@ const GroupsScreen = () => {
                       fontWeight: "bold",
                       color: "green",
                       marginTop: 2,
-                       fontSize:10
+                      fontSize: 10,
                     }}
                   >
                     Lent: ${group.youLent.toFixed(2)}
@@ -102,7 +108,7 @@ const GroupsScreen = () => {
                       fontWeight: "bold",
                       color: "red",
                       marginTop: 2,
-                      fontSize:10
+                      fontSize: 10,
                     }}
                   >
                     Owe: ${group.youOwe.toFixed(2)}
