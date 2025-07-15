@@ -1,10 +1,10 @@
 
 
 const Routes = {
-  SEND_OPT: "auth/sendotp",
-  VERIFY_OPT: "auth/verify-and-signup",
-  LOGIN: "auth/login",
-  LOGOUT :'auth/logout',
+  SEND_OPT: "/auth/sendotp",
+  VERIFY_OPT: "/auth/verify-and-signup",
+  LOGIN: "/auth/login",
+  LOGOUT :'/auth/logout',
 
   //Groups API
   GET_USER_GROUP: "/api/groups/usergroup",
