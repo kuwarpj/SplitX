@@ -34,7 +34,7 @@ const AddExpense = ({ route, navigation }) => {
   const { userGroup, user } = useApp();
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
-  const [paidBy, setPaidBy] = useState(String);
+  const [paidBy, setPaidBy] = useState<string>("");
   const [splitType, setSplitType] = useState<SplitType>("equal");
   const [notes, setNotes] = useState("");
   const [showPaidByModal, setShowPaidByModal] = useState(false);
@@ -79,12 +79,12 @@ const AddExpense = ({ route, navigation }) => {
       if (foundMember) {
         setPaidBy(user.id);
       } else {
-        setPaidBy(selectedGroup.members[0]._id);
+        setPaidBy(selectedGroup?.members?.[0]._id);
       }
     }
   }, [selectedGroup, user]);
 
-  const selectedMembers = groupMembers.filter((member) => member.isSelected);
+  const selectedMembers = groupMembers?.filter((member) => member.isSelected);
   const totalAmount = parseFloat(amount) || 0;
 
   const toggleMemberSelection = (memberId: string) => {
@@ -229,13 +229,10 @@ const AddExpense = ({ route, navigation }) => {
                   styles.saveButtonDisabled,
               ]}
             >
-              <Text style={styles.saveButtonText}>
-                {isSubmitting ? (
-                  <Text style={styles.saveButtonText}>Saving</Text>
-                ) : (
-                  <Text style={styles.saveButtonText}>Save</Text>
-                )}
-              </Text>
+              
+                <Text style={styles.saveButtonText}>
+                  {isSubmitting ? "Saving" : "Save"}
+                </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -255,7 +252,7 @@ const AddExpense = ({ route, navigation }) => {
                     style={{
                       width: 25,
                       height: 25,
-                      borderRadius: "50%",
+                      borderRadius: 12.5,
                       marginInlineEnd: 10,
                     }}
                   />
@@ -446,7 +443,7 @@ const AddExpense = ({ route, navigation }) => {
                     <Text style={styles.avatarTextSmall}>
                       {selectedGroup?.members
                         ?.find((m: any) => m._id === paidBy)
-                        ?.username.charAt(0)}
+                        ?.username?.charAt(0) ?? ""}
                     </Text>
                   </View>
                   <View style={styles.optionChevron}>
@@ -794,7 +791,7 @@ const AddExpense = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-      flex: 1,
+    flex: 1,
     backgroundColor: lightThemeColors.background,
   },
   header: {

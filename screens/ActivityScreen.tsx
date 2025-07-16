@@ -1,6 +1,8 @@
 // ActivityScreen.tsx (React Native Version with Pixel-Perfect Matching)
+import Routes from "@/constants/ApiRoutes";
+import { fetchAPI } from "@/utils/fetchAPI";
 import { Feather } from "@expo/vector-icons";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   LayoutAnimation,
   Platform,
@@ -174,6 +176,21 @@ const ActivityScreen = () => {
     if (activeFilter === "you_are_owed") return a.yourShare < 0;
     return true;
   });
+
+  const getRecentActivity = useCallback(async()=>{
+
+    try {
+
+      const data = await fetchAPI(Routes.GET_RECENT_ACTIVITY, 'GET')
+      if(data?.success){
+        
+      }
+      
+    } catch (error) {
+      
+    }
+
+  },[])
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={styles.header}>
