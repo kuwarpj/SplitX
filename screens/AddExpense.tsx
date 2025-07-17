@@ -58,6 +58,9 @@ const AddExpense = ({ route, navigation }) => {
     }
   }, [groupId, userGroup]);
 
+  const { currentGroupId } = useApp();
+
+  console.log("This is Current Group id---->", currentGroupId);
   const selectedGroup = useMemo(() => {
     return userGroup?.find((group) => group._id === selectedGroupId);
   }, [userGroup, selectedGroupId]);
@@ -229,10 +232,9 @@ const AddExpense = ({ route, navigation }) => {
                   styles.saveButtonDisabled,
               ]}
             >
-              
-                <Text style={styles.saveButtonText}>
-                  {isSubmitting ? "Saving" : "Save"}
-                </Text>
+              <Text style={styles.saveButtonText}>
+                {isSubmitting ? "Saving" : "Save"}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

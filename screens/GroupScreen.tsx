@@ -86,7 +86,7 @@ const GroupsScreen = () => {
                         fontSize: 10,
                       }}
                     >
-                      Lent: ${group?.summary?.netLent?.toFixed(2)}
+                      Lent: ₹ {group?.summary?.netLent?.toFixed(2)}
                     </Text>
                   )}
 
@@ -100,7 +100,7 @@ const GroupsScreen = () => {
                         fontSize: 10,
                       }}
                     >
-                      Owe: ${group?.summary?.netOwe?.toFixed(2)}
+                      Owe:₹ {group?.summary?.netOwe?.toFixed(2)}
                     </Text>
                   )}
                 </View>

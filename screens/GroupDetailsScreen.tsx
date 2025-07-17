@@ -1,5 +1,7 @@
 import Button from "@/components/ui/Button";
 import Routes from "@/constants/ApiRoutes";
+import { useApp } from "@/context/AppContext";
+import GroupDetailsSkeleton from "@/skeleton/GroupDetailsScreenSkeleton";
 import { fetchAPI } from "@/utils/fetchAPI";
 import { formatTimeAgo } from "@/utils/utils";
 import { Feather } from "@expo/vector-icons";
@@ -24,8 +26,10 @@ const GroupDetailsScreen = () => {
   const route = useRoute();
   const { groupId } = route.params;
 
+  const { setCurrentGroupId } = useApp();
   const [expense, setExpense] = useState([]);
   const [userGroupSummary, setUserGroupSummary] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const getGroupDetails = useCallback(async () => {
     try {
@@ -43,17 +47,21 @@ const GroupDetailsScreen = () => {
   }, []);
 
   const getUserGroupFinincialSummary = useCallback(async () => {
+    setLoading(true);
     try {
       const data = await fetchAPI(
         Routes.GET_USER_GROUP_SUMMARY(groupId),
         "GET"
       );
-      console.log("This is Central response------->", JSON.stringify(data));
-
+      
       if (data?.success === true) {
+        setCurrentGroupId(data?.data?._id);
         setUserGroupSummary(data?.data);
       }
-    } catch (error) {}
+    } catch (error) {
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useFocusEffect(
@@ -324,85 +332,96 @@ const GroupDetailsScreen = () => {
           <Button
             label="Settle Up"
             variant="outline"
-            icon={<Feather name="dollar-sign" size={16} color={colors.primary} />}
+            icon={
+              <Feather name="dollar-sign" size={16} color={colors.primary} />
+            }
           />
         </View>
 
         {/* Transactions */}
-        <View style={{ marginTop: 20 }}>
-          <Text style={styles.sectionTitle}>Transactions</Text>
-          {expense?.map((t: any) => (
-            <View key={t._id} style={styles.transactionCard}>
-              <View style={styles.rowBetween}>
-                <View style={styles.row}>
-                  <Text style={{ fontSize: 20 }}>
-                    {/* {getCategoryIcon(t.category)} */}
-                    🍽️
-                  </Text>
-                  <View style={{ marginLeft: 8 }}>
-                    <Text style={{ fontWeight: "bold" }}>{t.description}</Text>
-                    <Text style={styles.grayText}>
-                      {formatTimeAgo(t.createdAt)}
-                    </Text>
-                  </View>
-                </View>
-                <View style={{ alignItems: "flex-end" }}>
-                  <View style={{ alignItems: "flex-end" }}>
-                    <Text
-                      style={{
-                        color:
-                          t.status === "lent"
-                            ? "#16a34a"
-                            : t.status === "owe"
-                            ? "#dc2626"
-                            : "#6b7280",
-                        fontWeight: "bold",
-                        fontSize: 12,
-                      }}
-                    >
-                      ₹{t.amountInView}
-                    </Text>
 
-                    <Text
-                      style={{
-                        color:
-                          t.status === "lent"
-                            ? "#16a34a"
-                            : t.status === "owe"
-                            ? "#dc2626"
-                            : "#6b7280",
-                        fontSize: 12,
-                      }}
-                    >
-                      {t.status === "lent"
-                        ? "lent"
-                        : t.status === "owe"
-                        ? "owe"
-                        : ""}
+        {loading ? (
+          <GroupDetailsSkeleton />
+        ) : (
+          <View style={{ marginTop: 20 }}>
+            <Text style={styles.sectionTitle}>Transactions</Text>
+            {expense?.map((t: any) => (
+              <View key={t.id} style={styles.transactionCard}>
+                <View style={styles.rowBetween}>
+                  <View style={styles.row}>
+                    <Text style={{ fontSize: 20 }}>
+                      {/* {getCategoryIcon(t.category)} */}
+                      🍽️
                     </Text>
+                    <View style={{ marginLeft: 8 }}>
+                      <Text style={{ fontWeight: "bold" }}>
+                        {t.description}
+                      </Text>
+                      <Text style={styles.grayText}>
+                        {formatTimeAgo(t.createdAt)}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={{ alignItems: "flex-end" }}>
+                    <View style={{ alignItems: "flex-end" }}>
+                      <Text
+                        style={{
+                          color:
+                            t.status === "lent"
+                              ? "#16a34a"
+                              : t.status === "owe"
+                              ? "#dc2626"
+                              : "#6b7280",
+                          fontWeight: "bold",
+                          fontSize: 12,
+                        }}
+                      >
+                        ₹{t.amountInView}
+                      </Text>
+
+                      <Text
+                        style={{
+                          color:
+                            t.status === "lent"
+                              ? "#16a34a"
+                              : t.status === "owe"
+                              ? "#dc2626"
+                              : "#6b7280",
+                          fontSize: 12,
+                        }}
+                      >
+                        {t.status === "lent"
+                          ? "lent"
+                          : t.status === "owe"
+                          ? "owe"
+                          : ""}
+                      </Text>
+                    </View>
                   </View>
                 </View>
-              </View>
-              <View
-                style={{
-                  backgroundColor: "#F9FAFB",
-                  borderRadius: 12,
-                  padding: 12,
-                  marginVertical: 12,
-                }}
-              >
-                <Text style={{ fontSize: 12, color: "#374151" }}>
-                  <Text style={{ fontWeight: 500 }}>{t?.paidBy?.username}</Text>{" "}
-                  paid <Text style={{ fontWeight: 600 }}>₹{t?.amount}</Text> and
-                  split between{" "}
-                  <Text style={{ fontWeight: 500 }}>
-                    {t?.participants?.length} members
+                <View
+                  style={{
+                    backgroundColor: "#F9FAFB",
+                    borderRadius: 12,
+                    padding: 12,
+                    marginVertical: 12,
+                  }}
+                >
+                  <Text style={{ fontSize: 12, color: "#374151" }}>
+                    <Text style={{ fontWeight: 500 }}>
+                      {t?.paidBy?.username}
+                    </Text>{" "}
+                    paid <Text style={{ fontWeight: 600 }}>₹{t?.amount}</Text>{" "}
+                    and split between{" "}
+                    <Text style={{ fontWeight: 500 }}>
+                      {t?.participants?.length} members
+                    </Text>
                   </Text>
-                </Text>
+                </View>
               </View>
-            </View>
-          ))}
-        </View>
+            ))}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

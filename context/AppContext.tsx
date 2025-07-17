@@ -25,6 +25,8 @@ type AppContextType = {
   userGroup: any[] | null;
   setUserGroup?: (items: any[] | null) => void;
   loading: boolean;
+  currentGroupId: string | null;
+  setCurrentGroupId: (val: string | null) => void;
 };
 
 const AppContext = createContext<AppContextType>({
@@ -36,6 +38,8 @@ const AppContext = createContext<AppContextType>({
   userGroup: null,
   setUserGroup: () => {},
   loading: true,
+  setCurrentGroupId: () => {},
+  currentGroupId: "",
 });
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
@@ -43,6 +47,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userGroup, setUserGroup] = useState<any[] | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentGroupId, setCurrentGroupId] = useState<string | null>(null);
 
   const getUser = async () => {
     const token = await storage.get("token");
@@ -80,7 +85,16 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AppContext.Provider
-      value={{ isLoggedIn, setIsLoggedIn, user, setUser, userGroup , loading,}}
+      value={{
+        isLoggedIn,
+        setIsLoggedIn,
+        user,
+        setUser,
+        userGroup,
+        loading,
+        setCurrentGroupId,
+        currentGroupId,
+      }}
     >
       {children}
     </AppContext.Provider>
