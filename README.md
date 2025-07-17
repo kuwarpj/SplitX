@@ -16,35 +16,63 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+# SplitX – Smart Bill Splitting App
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+SplitX is a modern bill-splitting application (similar to Splitwise) that helps friends easily share expenses and manage who owes whom, with real-time dynamic calculations.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## 🚀 Features
 
-When you're ready, run:
+- **Create Groups**  
+  Create unlimited groups (trips, events, roommates) to manage shared bills.
 
-```bash
-npm run reset-project
-```
+- **Invite Friends via Email**  
+  Send email invites to add friends into your groups. They’ll join using a unique invite link.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+- **Flexible Bill Splitting**  
+  - Split equally among all members.  
+  - Custom split: assign specific amounts to each person.
 
-## Learn more
+- **Personalized User Dashboard**  
+  - See what you owe to others in each group.  
+  - See what others owe you.  
+  - Detailed group-wise view of splits and history.
 
-To learn more about developing your project with Expo, look at the following resources:
+- **Real-Time Dynamic Calculations**  
+  - Instantly updates balances after every transaction.  
+  - Track who owes whom and how much, always up-to-date.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- **Summary Dashboard**  
+  - View total owed, total lent, and overall net balance across all groups.
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## 📊 How It Works
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+1. Create a group.
+2. Invite people via email.
+3. Split expenses (equal or custom).
+4. Track balances in real-time.
+5. View total net balance in the dashboard.
+
+---
+
+## 📧 Planned Features
+
+- Payment reminders via notifications.
+- Expense settlement with payment gateway integration.
+- Export group reports as PDF.
+- Group chat for expense discussion.
+- Activity logs for expense tracking.
+
+---
+
+## ⚙️ Tech Stack
+
+- React Native (Frontend)
+- Node.js + Express (Backend)
+- MongoDB (Database)
+
+---
+
