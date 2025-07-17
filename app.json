@@ -16,7 +16,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.kuwarpj.SplitX"
     },
     "web": {
       "bundler": "metro",
@@ -33,6 +34,11 @@
           "backgroundColor": "#ffffff"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ac7d00e9-1daf-462b-bee1-e7291ec3e25f"
+      }
+    }
   }
 }
